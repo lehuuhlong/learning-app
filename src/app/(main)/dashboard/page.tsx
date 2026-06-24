@@ -15,6 +15,7 @@ import {
 import StatsCard from "@/components/dashboard/StatsCard";
 import ProgressChart from "@/components/dashboard/ProgressChart";
 import DatasetAnalytics from "@/components/dashboard/DatasetAnalytics";
+import Roadmap from "@/components/dashboard/Roadmap";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
@@ -31,6 +32,8 @@ interface Stats {
     time: string;
   }>;
   analyticsData: Array<{ level: string; count: number }>;
+  isFirstLogin?: boolean;
+  targetLevel?: string;
 }
 
 const typeColors: Record<string, string> = {
@@ -47,7 +50,7 @@ export default function DashboardPage() {
   // Predefined recent vocab for the dashboard lookup showcase
   const recentVocab = [
     { kanji: "影響", hiragana: "えいきょう", romaji: "eikyou", meaning: "influence; effect" },
-    { kanji: "経験", hiragana: "けいけん", romaji: "けいけん", meaning: "experience" },
+    { kanji: "経験", hiragana: "けいけん", romaji: "keiken", meaning: "experience" },
     { kanji: "複雑", hiragana: "ふくざつ", romaji: "fukuzatsu", meaning: "complicated; complex" },
     { kanji: "届ける", hiragana: "とどける", romaji: "todokeru", meaning: "to deliver" }
   ];
@@ -58,6 +61,10 @@ export default function DashboardPage() {
         const response = await fetch("/api/dashboard");
         if (response.ok) {
           const data = await response.json();
+          if (data.isFirstLogin) {
+            window.location.href = "/onboarding";
+            return;
+          }
           setStats(data);
         }
       } catch (err) {
@@ -99,7 +106,9 @@ export default function DashboardPage() {
       { level: "N3", count: 1835 },
       { level: "N2 (Focus)", count: 1846 },
       { level: "N1", count: 3475 }
-    ]
+    ],
+    isFirstLogin: false,
+    targetLevel: "N2"
   };
 
   return (
@@ -149,7 +158,7 @@ export default function DashboardPage() {
         />
         <StatsCard
           title="Study Streak"
-          value={`${currentStats.streak} days`}
+          value={`${currentStats.streak} ${currentStats.streak === 1 ? 'day' : 'days'}`}
           description="Keep up the momentum!"
           icon={Flame}
           trend={{ value: 3, isPositive: true }}
@@ -176,7 +185,7 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent className="flex-1 flex flex-col items-center justify-center p-6 space-y-4">
               <div className="relative flex items-center justify-center h-36 w-36">
-                <svg className="w-full h-full transform -rotate-90">
+                <svg viewBox="0 0 144 144" className="w-full h-full transform -rotate-90">
                   {/* Background Circle */}
                   <circle
                     cx="72"
@@ -213,6 +222,11 @@ export default function DashboardPage() {
           </Card>
         </div>
 
+        {/* Roadmap Timeline - Bento Grid 6 Cols */}
+        <div className="md:col-span-3 lg:col-span-6 flex">
+          <Roadmap targetLevel={currentStats.targetLevel || "N2"} />
+        </div>
+
         {/* Dataset Analytics - Bento Grid 6 Cols */}
         <div className="md:col-span-3 lg:col-span-6 flex">
           <DatasetAnalytics data={currentStats.analyticsData} />
@@ -223,7 +237,7 @@ export default function DashboardPage() {
           <Card className="glass-card flex-1 border-none">
             <CardHeader>
               <CardTitle className="text-lg font-semibold">Recent Vocabulary</CardTitle>
-              <CardDescription>Top words from your N2 learning syllabus</CardDescription>
+              <CardDescription>Top words from your {currentStats.targetLevel || "N2"} learning syllabus</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid gap-3 sm:grid-cols-2">
@@ -247,15 +261,15 @@ export default function DashboardPage() {
           </Card>
         </div>
 
-        {/* Recent Activity - Bento Grid 12 Cols */}
-        <div className="md:col-span-3 lg:col-span-12 flex">
+        {/* Recent Activity - Bento Grid 6 Cols */}
+        <div className="md:col-span-3 lg:col-span-6 flex">
           <Card className="glass-card flex-1 border-none">
             <CardHeader>
               <CardTitle className="text-lg font-semibold">Recent Activity</CardTitle>
               <CardDescription>Your latest learning actions</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+              <div className="grid gap-3 sm:grid-cols-2">
                 {currentStats.recentActivity.map((item) => (
                   <div
                     key={item.id}
@@ -273,7 +287,7 @@ export default function DashboardPage() {
                       </Badge>
                     </div>
                     <div className="flex-1 space-y-1">
-                      <p className="text-sm font-medium leading-tight">
+                      <p className="text-sm font-medium leading-tight line-clamp-2">
                         {item.action}
                       </p>
                       <p className="text-xs text-muted-foreground">

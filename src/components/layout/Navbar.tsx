@@ -26,6 +26,7 @@ import {
   LogOut,
   Menu,
   User,
+  Settings,
   Sparkles,
   GraduationCap,
 } from "lucide-react";
@@ -137,9 +138,15 @@ export default function Navbar() {
                 </div>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link href="/dashboard" className="cursor-pointer gap-2">
+                  <Link href="/profile" className="cursor-pointer gap-2">
                     <User className="h-4 w-4" />
                     Profile
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/settings" className="cursor-pointer gap-2">
+                    <Settings className="h-4 w-4" />
+                    Settings
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />

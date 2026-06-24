@@ -42,7 +42,7 @@ export default function StatsCard({
 }: StatsCardProps) {
   return (
     <Card className={cn(
-      "group relative overflow-hidden border-border/50 bg-card/80 backdrop-blur-sm transition-all duration-300 hover:border-border hover:shadow-lg",
+      "group relative overflow-hidden border-border/50 bg-card/80 backdrop-blur-sm transition-all duration-300 hover:border-border hover:shadow-lg h-full",
       color === "primary" ? "" : `hover:border-${color}-500/30`
     )}>
       {/* Subtle gradient overlay on hover */}

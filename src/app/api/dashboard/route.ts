@@ -51,7 +51,9 @@ export async function GET() {
           { id: 3, action: "Scored 9/10 on Vocab Quiz", type: "quiz", time: "yesterday" }
         ],
         analyticsData,
-        learnedVocabIds: []
+        learnedVocabIds: [],
+        isFirstLogin: false,
+        targetLevel: "N2"
       });
     }
 
@@ -115,9 +117,11 @@ export async function GET() {
     for (const prog of recentProgress) {
       const vocab = prog.vocabId as any;
       if (vocab) {
+        const wordVal = vocab.word || vocab.kanji || "";
+        const readingVal = vocab.reading || vocab.hiragana || "";
         recentActivity.push({
           id: activityId++,
-          action: `Learned ${vocab.word} (${vocab.reading})`,
+          action: `Learned ${wordVal} (${readingVal})`,
           type: "vocabulary",
           time: formatTimeAgo(new Date(prog.updatedAt)),
           date: new Date(prog.updatedAt)
@@ -178,7 +182,9 @@ export async function GET() {
       quizAverage,
       recentActivity: finalRecentActivity,
       analyticsData,
-      learnedVocabIds: user.progress?.vocabLearned || []
+      learnedVocabIds: user.progress?.vocabLearned || [],
+      isFirstLogin: user.isFirstLogin ?? false,
+      targetLevel: user.targetLevel || null
     });
   } catch (error: any) {
     console.error("Dashboard API error:", error);

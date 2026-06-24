@@ -15,6 +15,14 @@ export interface IUser extends Document {
       type: string;
     }[];
   };
+  targetLevel?: "N1" | "N2" | "N3" | "N4" | "N5" | null;
+  isFirstLogin?: boolean;
+  learningHistory?: {
+    date: Date;
+    activityType: "vocabulary" | "grammar" | "dokkai";
+    score: number;
+    timeSpent: number;
+  }[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -64,6 +72,23 @@ const UserSchema = new Schema<IUser>(
         },
       ],
     },
+    targetLevel: {
+      type: String,
+      enum: ["N1", "N2", "N3", "N4", "N5", null],
+      default: null,
+    },
+    isFirstLogin: {
+      type: Boolean,
+      default: true,
+    },
+    learningHistory: [
+      {
+        date: { type: Date, default: Date.now },
+        activityType: { type: String, enum: ["vocabulary", "grammar", "dokkai"], required: true },
+        score: { type: Number, required: true },
+        timeSpent: { type: Number, required: true },
+      },
+    ],
   },
   {
     timestamps: true,
