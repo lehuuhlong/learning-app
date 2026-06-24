@@ -65,45 +65,6 @@ Correct answer: "${correctAnswer}"`;
       }
     }
 
-    // 2. Check for Anthropic Claude API key
-    if (process.env.ANTHROPIC_API_KEY) {
-      const url = "https://api.anthropic.com/v1/messages";
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "x-api-key": process.env.ANTHROPIC_API_KEY,
-          "anthropic-version": "2023-06-01",
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "claude-3-5-sonnet-20241022",
-          max_tokens: 1024,
-          system: systemPrompt,
-          messages: [{ role: "user", content: userPrompt }],
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        const text = data.content?.[0]?.text;
-        if (text) {
-          try {
-            const parsed = JSON.parse(text.trim());
-            return NextResponse.json(parsed);
-          } catch (e) {
-            console.error("Failed to parse Claude response as JSON:", text, e);
-          }
-        }
-      } else {
-        const errText = await response.text();
-        console.error("Claude API error:", errText);
-      }
-    }
-
-    // 3. Simulated Fallback (if no API keys are provided or APIs fail)
-    // We generate a high-quality customized mock explanation matching the question context.
-    console.log("No active LLM API keys found. Returning realistic simulated explanation.");
-
     const simulatedResponse = {
       whyCorrect: `Đáp án đúng là "${correctAnswer}". Trong ngữ cảnh câu hỏi này, cấu trúc ngữ pháp đòi hỏi sự liên kết về mặt ý nghĩa biểu thị hành động diễn ra tự nhiên, hoặc đi sau một điều kiện giả định phù hợp với sắc thái trang trọng của JLPT N2.`,
       whyWrong: `Lựa chọn của bạn là "${userAnswer}" chưa chính xác vì cấu trúc này không tương thích với trợ từ đứng trước hoặc biểu thị sai mối quan hệ nguyên nhân - kết quả của câu hỏi N2 này.`,

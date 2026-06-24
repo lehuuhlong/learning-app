@@ -1,22 +1,30 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 
 export interface IGrammar extends Document {
-  pattern: string;
-  meaning: string;
-  jlptLevel: "N1" | "N2" | "N3" | "N4" | "N5";
+  level: "N1" | "N2" | "N3" | "N4" | "N5";
   structure: string;
-  exampleSentence: string;
-  exampleMeaning: string;
-  notes: string;
+  meaning: string;
+  formation: string;
+  examples: {
+    japanese: string;
+    romaji: string;
+    vietnamese: string;
+  }[];
   createdAt: Date;
   updatedAt: Date;
 }
 
 const GrammarSchema = new Schema<IGrammar>(
   {
-    pattern: {
+    level: {
       type: String,
-      required: [true, "Grammar pattern is required"],
+      enum: ["N1", "N2", "N3", "N4", "N5"],
+      required: [true, "Level is required"],
+      index: true,
+    },
+    structure: {
+      type: String,
+      required: [true, "Structure is required"],
       trim: true,
     },
     meaning: {
@@ -24,39 +32,25 @@ const GrammarSchema = new Schema<IGrammar>(
       required: [true, "Meaning is required"],
       trim: true,
     },
-    jlptLevel: {
+    formation: {
       type: String,
-      enum: ["N1", "N2", "N3", "N4", "N5"],
-      default: "N2",
-      index: true,
-    },
-    structure: {
-      type: String,
-      required: [true, "Structure/formation rule is required"],
+      required: [true, "Formation is required"],
       trim: true,
     },
-    exampleSentence: {
-      type: String,
-      default: "",
-    },
-    exampleMeaning: {
-      type: String,
-      default: "",
-    },
-    notes: {
-      type: String,
-      default: "",
-    },
+    examples: [
+      {
+        japanese: { type: String, required: true },
+        romaji: { type: String, required: true },
+        vietnamese: { type: String, required: true },
+      },
+    ],
   },
   {
     timestamps: true,
   }
 );
 
-GrammarSchema.index({ pattern: "text", meaning: "text" });
-
 const Grammar: Model<IGrammar> =
-  mongoose.models.Grammar ||
-  mongoose.model<IGrammar>("Grammar", GrammarSchema);
+  mongoose.models.Grammar || mongoose.model<IGrammar>("Grammar", GrammarSchema);
 
 export default Grammar;
