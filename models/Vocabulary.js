@@ -2,44 +2,30 @@ const mongoose = require("mongoose");
 
 const VocabularySchema = new mongoose.Schema(
   {
-    kanji: {
+    word: {
       type: String,
-      required: [true, "Kanji is required"],
+      required: [true, "Word (Kanji/Expression) is required"],
       trim: true,
     },
-    hiragana: {
+    reading: {
       type: String,
-      required: [true, "Hiragana reading is required"],
+      required: [true, "Reading (Kana) is required"],
       trim: true,
-    },
-    romaji: {
-      type: String,
-      required: [true, "Romaji translation is required"],
-      trim: true,
-      lowercase: true,
     },
     meaning: {
       type: String,
-      required: [true, "English meaning is required"],
+      required: [true, "Meaning is required"],
       trim: true,
     },
-    jlptLevel: {
+    part_of_speech: {
+      type: [String],
+      default: [],
+    },
+    level: {
       type: String,
       enum: ["N1", "N2", "N3", "N4", "N5"],
       default: "N2",
       index: true,
-    },
-    exampleSentence: {
-      type: String,
-      default: "",
-    },
-    exampleMeaning: {
-      type: String,
-      default: "",
-    },
-    tags: {
-      type: [String],
-      default: [],
     },
   },
   {
@@ -48,7 +34,7 @@ const VocabularySchema = new mongoose.Schema(
 );
 
 // Optimize vocabulary searches with a text index on key fields
-VocabularySchema.index({ kanji: "text", hiragana: "text", meaning: "text" });
+VocabularySchema.index({ word: "text", reading: "text", meaning: "text" });
 
 const Vocabulary = mongoose.models.Vocabulary || mongoose.model("Vocabulary", VocabularySchema);
 

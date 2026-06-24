@@ -55,7 +55,7 @@ export default function DashboardPage() {
   useEffect(() => {
     async function fetchStats() {
       try {
-        const response = await fetch("/api/dashboard/stats");
+        const response = await fetch("/api/dashboard");
         if (response.ok) {
           const data = await response.json();
           setStats(data);

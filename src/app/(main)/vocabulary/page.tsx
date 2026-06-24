@@ -1,85 +1,74 @@
 "use client";
 
-import { useState } from "react";
-import type { Metadata } from "next";
+import { useState, useEffect } from "react";
 import FlashCard from "@/components/vocabulary/FlashCard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BookOpen, Shuffle } from "lucide-react";
-
-// Mock vocabulary data (matches seed data so UI works without DB)
-const mockVocabulary = [
-  {
-    _id: "1",
-    kanji: "影響",
-    hiragana: "えいきょう",
-    romaji: "eikyou",
-    meaning: "influence; effect; impact",
-    jlptLevel: "N2",
-    exampleSentence: "この決定は私たちの生活に大きな影響を与えるだろう。",
-    exampleMeaning:
-      "This decision will probably have a big impact on our lives.",
-    tags: ["noun", "suru-verb", "formal"],
-  },
-  {
-    _id: "2",
-    kanji: "経験",
-    hiragana: "けいけん",
-    romaji: "keiken",
-    meaning: "experience",
-    jlptLevel: "N2",
-    exampleSentence: "海外で働いた経験がありますか。",
-    exampleMeaning: "Do you have experience working abroad?",
-    tags: ["noun", "suru-verb", "business"],
-  },
-  {
-    _id: "3",
-    kanji: "相変わらず",
-    hiragana: "あいかわらず",
-    romaji: "aikawarazu",
-    meaning: "as usual; as always; same as ever",
-    jlptLevel: "N2",
-    exampleSentence: "彼は相変わらず元気だ。",
-    exampleMeaning: "He is as energetic as ever.",
-    tags: ["adverb", "conversational"],
-  },
-  {
-    _id: "4",
-    kanji: "届ける",
-    hiragana: "とどける",
-    romaji: "todokeru",
-    meaning: "to deliver; to report; to notify",
-    jlptLevel: "N2",
-    exampleSentence: "荷物を友達の家に届けた。",
-    exampleMeaning: "I delivered the package to my friend's house.",
-    tags: ["ichidan-verb", "transitive"],
-  },
-  {
-    _id: "5",
-    kanji: "複雑",
-    hiragana: "ふくざつ",
-    romaji: "fukuzatsu",
-    meaning: "complicated; complex; intricate",
-    jlptLevel: "N2",
-    exampleSentence: "この問題はとても複雑で、簡単には解決できない。",
-    exampleMeaning:
-      "This problem is very complicated and cannot be easily solved.",
-    tags: ["na-adjective", "formal"],
-  },
-];
+import { BookOpen, Shuffle, Loader2 } from "lucide-react";
 
 export default function VocabularyPage() {
+  const [vocabulary, setVocabulary] = useState<any[]>([]);
   const [learnedIds, setLearnedIds] = useState<Set<string>>(new Set());
-  const [vocabulary] = useState(mockVocabulary);
+  const [loading, setLoading] = useState(true);
 
-  function handleMarkLearned(id: string) {
-    setLearnedIds((prev) => new Set([...prev, id]));
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const [vocabRes, dashRes] = await Promise.all([
+          fetch("/api/vocabulary?level=N2&limit=60"),
+          fetch("/api/dashboard")
+        ]);
+
+        if (vocabRes.ok) {
+          const vocabData = await vocabRes.json();
+          setVocabulary(vocabData.vocabulary || []);
+        }
+
+        if (dashRes.ok) {
+          const dashData = await dashRes.json();
+          if (dashData.learnedVocabIds) {
+            setLearnedIds(new Set(dashData.learnedVocabIds));
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load vocabulary data:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadData();
+  }, []);
+
+  async function handleMarkLearned(id: string) {
+    try {
+      const response = await fetch("/api/vocabulary", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ vocabId: id, status: "learned" }),
+      });
+      if (response.ok) {
+        setLearnedIds((prev) => new Set([...prev, id]));
+      }
+    } catch (err) {
+      console.error("Failed to mark word as learned:", err);
+    }
   }
 
   function shuffleCards() {
-    // Simple shuffle for demo
-    window.location.reload();
+    setVocabulary((prev) => [...prev].sort(() => Math.random() - 0.5));
+  }
+
+  if (loading) {
+    return (
+      <div className="flex h-[calc(100vh-4rem)] items-center justify-center">
+        <div className="flex flex-col items-center gap-2">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground font-medium">Loading vocabulary...</p>
+        </div>
+      </div>
+    );
   }
 
   return (

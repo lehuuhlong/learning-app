@@ -139,13 +139,13 @@ export default function DokkaiReader() {
     >
       {/* Left Panel: Reading Passage */}
       <ResizablePanel defaultSize={55} minSize={30} id="reading-panel">
-        <div className="flex h-full flex-col">
+        <div className="flex h-full flex-col glass-card">
           {/* Passage Header */}
-          <div className="flex items-center justify-between border-b border-border/50 bg-card/50 px-6 py-4">
+          <div className="flex items-center justify-between border-b border-border/20 px-6 py-4">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <BookOpen className="h-4 w-4 text-muted-foreground" />
-                <h2 className="text-lg font-semibold">
+                <BookOpen className="h-4 w-4 text-emerald-400" />
+                <h2 className="text-lg font-semibold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
                   {readingPassage.title}
                 </h2>
               </div>
@@ -153,7 +153,7 @@ export default function DokkaiReader() {
                 {readingPassage.titleEn}
               </p>
             </div>
-            <Badge variant="secondary" className="text-sm font-medium">
+            <Badge variant="secondary" className="text-sm font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
               {readingPassage.level}
             </Badge>
           </div>
@@ -187,11 +187,11 @@ export default function DokkaiReader() {
 
       {/* Right Panel: Questions */}
       <ResizablePanel defaultSize={45} minSize={30} id="questions-panel">
-        <div className="flex h-full flex-col">
+        <div className="flex h-full flex-col glass-card border-l-0">
           {/* Questions Header */}
-          <div className="flex items-center justify-between border-b border-border/50 bg-card/50 px-6 py-4">
+          <div className="flex items-center justify-between border-b border-border/20 px-6 py-4">
             <div className="space-y-1">
-              <h2 className="text-lg font-semibold">Comprehension Questions</h2>
+              <h2 className="text-lg font-semibold bg-gradient-to-r from-violet-400 to-fuchsia-400 bg-clip-text text-transparent">Comprehension Questions</h2>
               <p className="text-sm text-muted-foreground">
                 {questions.length} questions
               </p>
@@ -199,12 +199,12 @@ export default function DokkaiReader() {
             {showResults && (
               <Badge
                 variant="secondary"
-                className={`text-sm font-semibold ${
+                className={`text-sm font-semibold border ${
                   totalCorrect === questions.length
-                    ? "bg-green-500/10 text-green-500"
+                    ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                     : totalCorrect > 0
-                    ? "bg-amber-500/10 text-amber-500"
-                    : "bg-red-500/10 text-red-500"
+                    ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                    : "bg-rose-500/10 text-rose-400 border-rose-500/20"
                 }`}
               >
                 {totalCorrect} / {questions.length} correct
