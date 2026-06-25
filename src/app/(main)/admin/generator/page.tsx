@@ -118,7 +118,7 @@ export default function AdminGeneratorPage() {
       <div className="grid gap-8 lg:grid-cols-12 z-10 relative">
         {/* Left Side: Parameters Configuration Form (5 cols) */}
         <div className="lg:col-span-5 space-y-6">
-          <Card className="glass-card border-none">
+          <Card className="border border-border/50 bg-card/80 backdrop-blur-sm hover:shadow-lg transition-all duration-300">
             <CardHeader>
               <CardTitle className="text-lg font-semibold flex items-center gap-2">
                 <Sparkles className="h-5 w-5 text-violet-500" />
@@ -230,7 +230,7 @@ export default function AdminGeneratorPage() {
 
         {/* Right Side: Generation Results Showcase (7 cols) */}
         <div className="lg:col-span-7 space-y-6">
-          <Card className="glass-card border-none h-full flex flex-col min-h-[450px]">
+          <Card className="border border-border/50 bg-card/80 backdrop-blur-sm hover:shadow-lg transition-all duration-300 h-full flex flex-col min-h-[450px]">
             <CardHeader className="pb-3 border-b border-border/10">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-lg font-semibold flex items-center gap-2">

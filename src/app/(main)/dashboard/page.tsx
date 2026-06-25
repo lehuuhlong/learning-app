@@ -213,8 +213,10 @@ export default function DashboardPage() {
           color="amber"
         />
         {/* Streak Card with Fire Animation */}
-        <Card className="glass-card border-none h-full">
-          <CardContent className="p-6 flex flex-col justify-between h-full">
+        <Card className="group relative overflow-hidden border border-border/50 bg-card/80 backdrop-blur-sm transition-all duration-300 hover:border-border hover:shadow-lg h-full">
+          {/* Subtle gradient overlay on hover */}
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-rose-500/[0.05] group-hover:shadow-rose-500/5 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+          <CardContent className="p-6 flex flex-col justify-between h-full relative z-10">
             <div className="flex items-center justify-between">
               <p className="text-sm font-medium text-muted-foreground">
                 {t("dashboard.streakTitle")}
@@ -266,16 +268,56 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      {/* Bento Grid Layout */}
-      <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-12">
-        {/* Progress Chart - Bento Grid 7 Cols */}
-        <div className="md:col-span-2 lg:col-span-7 flex">
+      {/* Bento Layout with 2 Columns to eliminate vertical gaps */}
+      <div className="grid gap-6 lg:grid-cols-12">
+        {/* Left Column (7 Cols) */}
+        <div className="lg:col-span-7 flex flex-col gap-6">
           <ProgressChart />
+          
+          <Roadmap targetLevel={currentStats.targetLevel || "N2"} />
+
+          {/* Recent Vocab */}
+          <Card className="border border-border/50 bg-card/80 backdrop-blur-sm hover:shadow-lg transition-all duration-300">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold">
+                {t("dashboard.recentVocabTitle")}
+              </CardTitle>
+              <CardDescription>
+                {t("dashboard.recentVocabDesc", { level: currentStats.targetLevel || "N2" })}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {recentVocab.map((vocab) => (
+                  <div
+                    key={vocab.kanji}
+                    className="flex flex-col p-3 rounded-xl border border-border/40 bg-card/40 backdrop-blur-sm hover:border-primary/20 transition-all hover:bg-card/60"
+                  >
+                    <div className="flex items-baseline justify-between">
+                      <span className="text-lg font-bold text-foreground">
+                        {vocab.kanji}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground font-semibold">
+                        {vocab.hiragana}
+                      </span>
+                    </div>
+                    <span className="text-xs text-primary font-medium tracking-wide pb-1">
+                      {vocab.romaji}
+                    </span>
+                    <span className="text-xs text-muted-foreground line-clamp-1 border-t border-border/20 pt-1">
+                      {vocab.meaning}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* EXP & Level Card - Bento Grid 5 Cols */}
-        <div className="md:col-span-1 lg:col-span-5 flex">
-          <Card className="glass-card flex-1 flex flex-col justify-between border-none">
+        {/* Right Column (5 Cols) */}
+        <div className="lg:col-span-5 flex flex-col gap-6">
+          {/* EXP & Level Card */}
+          <Card className="border border-border/50 bg-card/80 backdrop-blur-sm flex flex-col justify-between hover:shadow-lg transition-all duration-300">
             <CardHeader className="pb-2">
               <CardTitle className="text-lg font-semibold flex items-center gap-2">
                 <Zap className="h-5 w-5 text-amber-500" />
@@ -285,7 +327,7 @@ export default function DashboardPage() {
                 {t("dashboard.levelExpDesc")}
               </CardDescription>
             </CardHeader>
-            <CardContent className="flex-1 flex flex-col items-center justify-center p-6 space-y-5">
+            <CardContent className="flex flex-col items-center justify-center p-6 space-y-5">
               {/* Level Display */}
               <div className="relative flex items-center justify-center">
                 <div className="h-24 w-24 rounded-full bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center border-2 border-amber-500/30 shadow-lg shadow-amber-500/10">
@@ -340,21 +382,11 @@ export default function DashboardPage() {
                 )}
             </CardContent>
           </Card>
-        </div>
 
-        {/* Roadmap Timeline - Bento Grid 6 Cols */}
-        <div className="md:col-span-3 lg:col-span-6 flex">
-          <Roadmap targetLevel={currentStats.targetLevel || "N2"} />
-        </div>
-
-        {/* Dataset Analytics - Bento Grid 6 Cols */}
-        <div className="md:col-span-3 lg:col-span-6 flex">
           <DatasetAnalytics data={currentStats.analyticsData} />
-        </div>
 
-        {/* Daily Goal Ring - Bento Grid 6 Cols */}
-        <div className="md:col-span-3 lg:col-span-6 flex">
-          <Card className="glass-card flex-1 flex flex-col justify-between border-none">
+          {/* Daily Goal Ring */}
+          <Card className="border border-border/50 bg-card/80 backdrop-blur-sm flex flex-col justify-between hover:shadow-lg transition-all duration-300">
             <CardHeader className="pb-2">
               <CardTitle className="text-lg font-semibold flex items-center gap-2">
                 <Sparkles className="h-5 w-5 text-rose-500" />
@@ -364,7 +396,7 @@ export default function DashboardPage() {
                 {t("dashboard.dailyGoalDesc")}
               </CardDescription>
             </CardHeader>
-            <CardContent className="flex-1 flex flex-col items-center justify-center p-6 space-y-4">
+            <CardContent className="flex flex-col items-center justify-center p-6 space-y-4">
               <div className="relative flex items-center justify-center h-36 w-36">
                 <svg
                   viewBox="0 0 144 144"
@@ -406,50 +438,9 @@ export default function DashboardPage() {
               </p>
             </CardContent>
           </Card>
-        </div>
 
-        {/* Recent Vocab - Bento Grid 6 Cols */}
-        <div className="md:col-span-3 lg:col-span-6 flex">
-          <Card className="glass-card flex-1 border-none">
-            <CardHeader>
-              <CardTitle className="text-lg font-semibold">
-                {t("dashboard.recentVocabTitle")}
-              </CardTitle>
-              <CardDescription>
-                {t("dashboard.recentVocabDesc", { level: currentStats.targetLevel || "N2" })}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-3 sm:grid-cols-2">
-                {recentVocab.map((vocab) => (
-                  <div
-                    key={vocab.kanji}
-                    className="flex flex-col p-3 rounded-xl border border-border/40 bg-card/40 backdrop-blur-sm hover:border-primary/20 transition-all hover:bg-card/60"
-                  >
-                    <div className="flex items-baseline justify-between">
-                      <span className="text-lg font-bold text-foreground">
-                        {vocab.kanji}
-                      </span>
-                      <span className="text-[10px] text-muted-foreground font-semibold">
-                        {vocab.hiragana}
-                      </span>
-                    </div>
-                    <span className="text-xs text-primary font-medium tracking-wide pb-1">
-                      {vocab.romaji}
-                    </span>
-                    <span className="text-xs text-muted-foreground line-clamp-1 border-t border-border/20 pt-1">
-                      {vocab.meaning}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Recent Activity - Bento Grid 6 Cols */}
-        <div className="md:col-span-3 lg:col-span-6 flex">
-          <Card className="glass-card flex-1 border-none">
+          {/* Recent Activity */}
+          <Card className="border border-border/50 bg-card/80 backdrop-blur-sm hover:shadow-lg transition-all duration-300">
             <CardHeader>
               <CardTitle className="text-lg font-semibold">
                 {t("dashboard.recentActivityTitle")}

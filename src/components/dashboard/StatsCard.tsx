@@ -32,6 +32,15 @@ const gradientMap = {
   violet: "from-violet-500/[0.05] group-hover:shadow-violet-500/5",
 };
 
+const hoverBorderMap = {
+  primary: "",
+  blue: "hover:border-blue-500/30",
+  emerald: "hover:border-emerald-500/30",
+  amber: "hover:border-amber-500/30",
+  rose: "hover:border-rose-500/30",
+  violet: "hover:border-violet-500/30",
+};
+
 export default function StatsCard({
   title,
   value,
@@ -42,8 +51,8 @@ export default function StatsCard({
 }: StatsCardProps) {
   return (
     <Card className={cn(
-      "group relative overflow-hidden border-border/50 bg-card/80 backdrop-blur-sm transition-all duration-300 hover:border-border hover:shadow-lg h-full",
-      color === "primary" ? "" : `hover:border-${color}-500/30`
+      "group relative overflow-hidden border border-border/50 bg-card/80 backdrop-blur-sm transition-all duration-300 hover:border-border hover:shadow-lg h-full",
+      hoverBorderMap[color]
     )}>
       {/* Subtle gradient overlay on hover */}
       <div className={cn(

@@ -203,7 +203,7 @@ export default function SettingsPage() {
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* Left Card: Target Level Setting */}
-        <Card className="glass-card border-none flex flex-col justify-between">
+        <Card className="border border-border/50 bg-card/80 backdrop-blur-sm flex flex-col justify-between hover:shadow-lg transition-all duration-300">
           <CardHeader>
             <CardTitle className="text-lg font-semibold flex items-center gap-2">
               <Target className="h-5 w-5 text-violet-500" />
@@ -249,7 +249,7 @@ export default function SettingsPage() {
         </Card>
 
         {/* Right Card: Change Password Form */}
-        <Card className="glass-card border-none">
+        <Card className="border border-border/50 bg-card/80 backdrop-blur-sm hover:shadow-lg transition-all duration-300">
           <CardHeader>
             <CardTitle className="text-lg font-semibold flex items-center gap-2">
               <Lock className="h-5 w-5 text-rose-500" />

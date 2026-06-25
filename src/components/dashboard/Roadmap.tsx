@@ -27,7 +27,7 @@ export default function Roadmap({ targetLevel }: RoadmapProps) {
   });
 
   return (
-    <Card className="glass-card border-none flex flex-col h-full">
+    <Card className="border border-border/50 bg-card/80 backdrop-blur-sm flex flex-col h-full hover:shadow-lg transition-all duration-300">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg font-semibold flex items-center gap-2">

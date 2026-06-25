@@ -193,7 +193,7 @@ export default function ProfilePage() {
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-rose-500/5 rounded-full blur-[120px] pointer-events-none" />
 
       {/* Header Profile Section */}
-      <Card className="glass-card border-none overflow-hidden relative">
+      <Card className="border border-border/50 bg-card/80 backdrop-blur-sm overflow-hidden relative hover:shadow-lg transition-all duration-300">
         <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-r from-violet-600/20 via-fuchsia-500/20 to-rose-600/20" />
         <CardContent className="pt-16 pb-6 px-6 relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-5">
@@ -288,7 +288,7 @@ export default function ProfilePage() {
       </div>
 
       {/* Achievement Badges Showcase */}
-      <Card className="glass-card border-none">
+      <Card className="border border-border/50 bg-card/80 backdrop-blur-sm hover:shadow-lg transition-all duration-300">
         <CardHeader>
           <CardTitle className="text-lg font-semibold flex items-center gap-2">
             <Trophy className="h-5 w-5 text-amber-500" />
@@ -356,7 +356,7 @@ export default function ProfilePage() {
       </Card>
 
       {/* Learning History Chart */}
-      <Card className="glass-card border-none">
+      <Card className="border border-border/50 bg-card/80 backdrop-blur-sm hover:shadow-lg transition-all duration-300">
         <CardHeader>
           <CardTitle className="text-lg font-semibold flex items-center gap-2">
             <Flame className="h-5 w-5 text-rose-500" />
@@ -367,9 +367,9 @@ export default function ProfilePage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="h-[350px] w-full pt-4">
-            <ChartContainer config={chartConfig} className="h-full w-full">
-              <BarChart data={profile.chartData} barGap={4}>
+          <div className="w-full pt-4">
+            <ChartContainer config={chartConfig} className="h-[350px] w-full">
+              <BarChart data={profile.chartData} barGap={4} margin={{ top: 20, right: 10, left: 10, bottom: 20 }}>
                 <CartesianGrid
                   strokeDasharray="3 3"
                   vertical={false}
@@ -380,15 +380,14 @@ export default function ProfilePage() {
                   tickLine={false}
                   axisLine={false}
                   tickMargin={8}
-                  fontSize={12}
-                  stroke="var(--muted-foreground)"
+                  tick={{ fill: "var(--muted-foreground)", fontSize: 12 }}
+                  interval={0}
                 />
                 <YAxis
                   tickLine={false}
                   axisLine={false}
                   tickMargin={8}
-                  fontSize={12}
-                  stroke="var(--muted-foreground)"
+                  tick={{ fill: "var(--muted-foreground)", fontSize: 12 }}
                 />
                 <ChartTooltip
                   content={<ChartTooltipContent />}
@@ -406,21 +405,18 @@ export default function ProfilePage() {
                 />
                 <Bar
                   dataKey="words"
-                  name={t("profile.chartWords")}
                   fill="var(--color-words)"
                   radius={[4, 4, 0, 0]}
                   maxBarSize={30}
                 />
                 <Bar
                   dataKey="quizzes"
-                  name={t("profile.chartQuizzes")}
                   fill="var(--color-quizzes)"
                   radius={[4, 4, 0, 0]}
                   maxBarSize={30}
                 />
                 <Bar
                   dataKey="reading"
-                  name={t("profile.chartReading")}
                   fill="var(--color-reading)"
                   radius={[4, 4, 0, 0]}
                   maxBarSize={30}

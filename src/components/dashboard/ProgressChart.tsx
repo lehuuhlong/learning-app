@@ -51,7 +51,7 @@ export default function ProgressChart() {
   }));
 
   return (
-    <Card className="border-border/50 bg-card/80 backdrop-blur-sm w-full">
+    <Card className="border border-border/50 bg-card/80 backdrop-blur-sm w-full hover:shadow-lg transition-all duration-300">
       <CardHeader>
         <CardTitle className="text-lg font-semibold">{t("progressChart.title")}</CardTitle>
         <CardDescription>
@@ -59,9 +59,9 @@ export default function ProgressChart() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="h-[300px] w-full">
-          <ChartContainer config={chartConfig} className="h-full w-full">
-            <BarChart data={chartData} barGap={4}>
+        <div className="w-full">
+          <ChartContainer config={chartConfig} className="h-[300px] w-full">
+            <BarChart data={chartData} barGap={4} margin={{ top: 20, right: 10, left: 10, bottom: 20 }}>
               <CartesianGrid
                 strokeDasharray="3 3"
                 vertical={false}
@@ -72,15 +72,14 @@ export default function ProgressChart() {
                 tickLine={false}
                 axisLine={false}
                 tickMargin={8}
-                fontSize={12}
-                stroke="var(--muted-foreground)"
+                tick={{ fill: "var(--muted-foreground)", fontSize: 12 }}
+                interval={0}
               />
               <YAxis
                 tickLine={false}
                 axisLine={false}
                 tickMargin={8}
-                fontSize={12}
-                stroke="var(--muted-foreground)"
+                tick={{ fill: "var(--muted-foreground)", fontSize: 12 }}
               />
               <ChartTooltip
                 content={<ChartTooltipContent />}
@@ -88,14 +87,12 @@ export default function ProgressChart() {
               />
               <Bar
                 dataKey="words"
-                name={t("progressChart.words")}
                 fill="var(--color-words)"
                 radius={[4, 4, 0, 0]}
                 maxBarSize={40}
               />
               <Bar
                 dataKey="quizzes"
-                name={t("progressChart.quizzes")}
                 fill="var(--color-quizzes)"
                 radius={[4, 4, 0, 0]}
                 maxBarSize={40}

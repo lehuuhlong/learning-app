@@ -30,7 +30,7 @@ export default function DatasetAnalytics({ data }: DatasetAnalyticsProps) {
   };
 
   return (
-    <Card className="glass-card border-none flex-1 flex flex-col justify-between">
+    <Card className="border border-border/50 bg-card/80 backdrop-blur-sm flex-1 flex flex-col justify-between hover:shadow-lg transition-all duration-300">
       <CardHeader>
         <CardTitle className="text-lg font-semibold">{t("datasetAnalytics.title")}</CardTitle>
         <CardDescription>
@@ -38,9 +38,9 @@ export default function DatasetAnalytics({ data }: DatasetAnalyticsProps) {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="h-[200px] w-full">
-          <ChartContainer config={chartConfig} className="h-full w-full">
-            <BarChart data={data}>
+        <div className="w-full">
+          <ChartContainer config={chartConfig} className="h-[200px] w-full">
+            <BarChart data={data} margin={{ top: 20, right: 10, left: 10, bottom: 20 }}>
               <CartesianGrid
                 strokeDasharray="3 3"
                 vertical={false}
@@ -51,15 +51,14 @@ export default function DatasetAnalytics({ data }: DatasetAnalyticsProps) {
                 tickLine={false}
                 axisLine={false}
                 tickMargin={8}
-                fontSize={11}
-                stroke="var(--muted-foreground)"
+                tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
+                interval={0}
               />
               <YAxis
                 tickLine={false}
                 axisLine={false}
                 tickMargin={8}
-                fontSize={11}
-                stroke="var(--muted-foreground)"
+                tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
               />
               <ChartTooltip
                 content={<ChartTooltipContent />}
@@ -67,7 +66,6 @@ export default function DatasetAnalytics({ data }: DatasetAnalyticsProps) {
               />
               <Bar
                 dataKey="count"
-                name={t("datasetAnalytics.wordsCount")}
                 fill="var(--color-count)"
                 radius={[4, 4, 0, 0]}
                 maxBarSize={45}
