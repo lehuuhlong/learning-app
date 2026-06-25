@@ -26,22 +26,13 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/components/providers/LanguageProvider";
 
-// Zod Validation Schema for Password Change
-const passwordSchema = z
-  .object({
-    currentPassword: z.string().min(1, "Mật khẩu hiện tại là bắt buộc"),
-    newPassword: z
-      .string()
-      .min(6, "Mật khẩu mới phải có ít nhất 6 ký tự"),
-    confirmPassword: z.string().min(1, "Vui lòng xác nhận mật khẩu mới"),
-  })
-  .refine((data) => data.newPassword === data.confirmPassword, {
-    message: "Xác nhận mật khẩu không khớp",
-    path: ["confirmPassword"],
-  });
-
-type PasswordFormValues = z.infer<typeof passwordSchema>;
+type PasswordFormValues = {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+};
 
 const levels = [
   { level: "N5", badgeColor: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20 hover:bg-emerald-500/20" },
@@ -58,6 +49,19 @@ export default function SettingsPage() {
   const [loadingLevel, setLoadingLevel] = useState(true);
   const [savingLevel, setSavingLevel] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
+  const { t } = useLanguage();
+
+  // Zod Validation Schema defined inside component to react to language changes
+  const passwordSchema = z
+    .object({
+      currentPassword: z.string().min(1, t("settings.currentPasswordRequired")),
+      newPassword: z.string().min(6, t("settings.newPasswordMin")),
+      confirmPassword: z.string().min(1, t("settings.confirmPasswordRequired")),
+    })
+    .refine((data) => data.newPassword === data.confirmPassword, {
+      message: t("settings.passwordMismatch"),
+      path: ["confirmPassword"],
+    });
 
   const {
     register,
@@ -111,15 +115,15 @@ export default function SettingsPage() {
 
       if (response.ok) {
         setTargetLevel(level);
-        toast.success(`Đã cập nhật mục tiêu học tập sang ${level}!`);
+        toast.success(t("settings.toastSuccessLevel", { level }));
         // Refresh session to keep level data synced
         await update();
       } else {
         const errData = await response.json();
-        throw new Error(errData.error || "Failed to update level");
+        throw new Error(errData.error || t("settings.toastErrorLevel"));
       }
     } catch (err: any) {
-      toast.error(err.message || "Không thể cập nhật mục tiêu");
+      toast.error(err.message || t("settings.toastErrorLevel"));
     } finally {
       setSavingLevel(false);
     }
@@ -142,13 +146,13 @@ export default function SettingsPage() {
       const data = await response.json();
 
       if (response.ok) {
-        toast.success("Thay đổi mật khẩu thành công!");
+        toast.success(t("settings.toastSuccessPassword"));
         reset();
       } else {
-        throw new Error(data.error || "Không thể đổi mật khẩu");
+        throw new Error(data.error || t("settings.toastErrorPassword"));
       }
     } catch (err: any) {
-      toast.error(err.message || "Đã xảy ra lỗi trong quá trình đổi mật khẩu");
+      toast.error(err.message || t("settings.toastErrorPassword"));
     } finally {
       setChangingPassword(false);
     }
@@ -159,7 +163,7 @@ export default function SettingsPage() {
       <div className="flex h-[calc(100vh-4rem)] items-center justify-center">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground font-medium">Đang tải cài đặt...</p>
+          <p className="text-sm text-muted-foreground font-medium">{t("settings.loading")}</p>
         </div>
       </div>
     );
@@ -171,9 +175,9 @@ export default function SettingsPage() {
         <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10 text-destructive">
           <Info className="h-6 w-6" />
         </div>
-        <h2 className="text-xl font-bold text-foreground">Bạn chưa đăng nhập</h2>
+        <h2 className="text-xl font-bold text-foreground">{t("common.unauthenticated")}</h2>
         <p className="text-sm text-muted-foreground">
-          Vui lòng đăng nhập để truy cập cài đặt tài khoản.
+          {t("common.pleaseLoginSettings")}
         </p>
       </div>
     );
@@ -190,10 +194,10 @@ export default function SettingsPage() {
       {/* Header */}
       <div className="space-y-1">
         <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-violet-600 via-fuchsia-500 to-rose-600 dark:from-violet-400 dark:via-fuchsia-400 dark:to-rose-400 bg-clip-text text-transparent">
-          Cài đặt tài khoản
+          {t("settings.title")}
         </h1>
         <p className="text-muted-foreground">
-          Quản lý mục tiêu học tập và thiết lập bảo mật tài khoản của bạn.
+          {t("settings.subtitle")}
         </p>
       </div>
 
@@ -203,15 +207,15 @@ export default function SettingsPage() {
           <CardHeader>
             <CardTitle className="text-lg font-semibold flex items-center gap-2">
               <Target className="h-5 w-5 text-violet-500" />
-              Mục tiêu JLPT
+              {t("settings.jlptTitle")}
             </CardTitle>
             <CardDescription>
-              Thay đổi cấp độ JLPT bạn đang chuẩn bị thi để cập nhật lộ trình.
+              {t("settings.jlptDesc")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6 flex-1 flex flex-col justify-center">
             <div className="flex flex-col gap-3">
-              <Label className="text-sm font-semibold text-muted-foreground">Chọn cấp độ mục tiêu:</Label>
+              <Label className="text-sm font-semibold text-muted-foreground">{t("settings.selectLevel")}</Label>
               <div className="grid grid-cols-5 gap-2">
                 {levels.map((lvl) => {
                   const isActive = targetLevel === lvl.level;
@@ -238,7 +242,7 @@ export default function SettingsPage() {
             <div className="bg-primary/5 border border-primary/10 rounded-xl p-3.5 flex gap-3 text-xs leading-relaxed text-muted-foreground">
               <Info className="h-4.5 w-4.5 text-primary shrink-0 mt-0.5" />
               <p>
-                Khi thay đổi cấp độ JLPT mục tiêu, sơ đồ bento và timeline lộ trình học tập của bạn trên trang Dashboard sẽ lập tức được điều chỉnh phù hợp với lượng từ vựng và cấp độ ngữ pháp tương ứng.
+                {t("settings.jlptChangeWarning")}
               </p>
             </div>
           </CardContent>
@@ -249,10 +253,10 @@ export default function SettingsPage() {
           <CardHeader>
             <CardTitle className="text-lg font-semibold flex items-center gap-2">
               <Lock className="h-5 w-5 text-rose-500" />
-              Mật khẩu & Bảo mật
+              {t("settings.passwordTitle")}
             </CardTitle>
             <CardDescription>
-              Cập nhật mật khẩu tài khoản của bạn để duy trì bảo mật cao.
+              {t("settings.passwordDesc")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -260,16 +264,16 @@ export default function SettingsPage() {
               <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 space-y-3">
                 <div className="flex gap-2.5 text-amber-500 text-sm font-semibold">
                   <ShieldCheck className="h-5 w-5 shrink-0" />
-                  <span>Liên kết đăng nhập qua Google OAuth</span>
+                  <span>{t("settings.oauthWarningTitle")}</span>
                 </div>
                 <p className="text-xs leading-relaxed text-muted-foreground">
-                  Tài khoản của bạn đã được đăng nhập thông qua Google. Tính năng đổi mật khẩu cục bộ không khả dụng. Bạn có thể thay đổi hoặc quản lý bảo mật tài khoản trực tiếp trong trang quản lý bảo mật của Google.
+                  {t("settings.oauthWarningDesc")}
                 </p>
               </div>
             ) : (
               <form onSubmit={handleSubmit(onPasswordSubmit)} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="currentPassword">Mật khẩu hiện tại</Label>
+                  <Label htmlFor="currentPassword">{t("settings.currentPassword")}</Label>
                   <Input
                     type="password"
                     id="currentPassword"
@@ -285,7 +289,7 @@ export default function SettingsPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="newPassword">Mật khẩu mới</Label>
+                  <Label htmlFor="newPassword">{t("settings.newPassword")}</Label>
                   <Input
                     type="password"
                     id="newPassword"
@@ -301,7 +305,7 @@ export default function SettingsPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Xác nhận mật khẩu mới</Label>
+                  <Label htmlFor="confirmPassword">{t("settings.confirmNewPassword")}</Label>
                   <Input
                     type="password"
                     id="confirmPassword"
@@ -324,10 +328,10 @@ export default function SettingsPage() {
                   {changingPassword ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Đang xử lý...
+                      {t("settings.processing")}
                     </>
                   ) : (
-                    "Đổi mật khẩu"
+                    t("settings.changePasswordBtn")
                   )}
                 </Button>
               </form>

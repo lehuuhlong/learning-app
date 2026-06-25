@@ -23,8 +23,19 @@ export interface IUser extends Document {
     score: number;
     timeSpent: number;
   }[];
+  gamification?: {
+    exp: number;
+    level: number;
+    currentStreak: number;
+    longestStreak: number;
+    lastActiveDate: string | null;
+    badges: string[];
+    flashcardsToday: number;
+    flashcardsTodayDate: string | null;
+  };
   createdAt: Date;
   updatedAt: Date;
+
 }
 
 const UserSchema = new Schema<IUser>(
@@ -89,6 +100,16 @@ const UserSchema = new Schema<IUser>(
         timeSpent: { type: Number, required: true },
       },
     ],
+    gamification: {
+      exp: { type: Number, default: 0 },
+      level: { type: Number, default: 1 },
+      currentStreak: { type: Number, default: 0 },
+      longestStreak: { type: Number, default: 0 },
+      lastActiveDate: { type: String, default: null },
+      badges: { type: [String], default: [] },
+      flashcardsToday: { type: Number, default: 0 },
+      flashcardsTodayDate: { type: String, default: null },
+    },
   },
   {
     timestamps: true,

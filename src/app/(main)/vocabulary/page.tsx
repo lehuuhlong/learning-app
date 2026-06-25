@@ -6,11 +6,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BookOpen, Shuffle, Loader2 } from "lucide-react";
+import { useLanguage } from "@/components/providers/LanguageProvider";
 
 export default function VocabularyPage() {
   const [vocabulary, setVocabulary] = useState<any[]>([]);
   const [learnedIds, setLearnedIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
+  const { t } = useLanguage();
 
   useEffect(() => {
     async function loadData() {
@@ -65,7 +67,7 @@ export default function VocabularyPage() {
       <div className="flex h-[calc(100vh-4rem)] items-center justify-center">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground font-medium">Loading vocabulary...</p>
+          <p className="text-sm text-muted-foreground font-medium">{t("common.loading")}</p>
         </div>
       </div>
     );
@@ -77,14 +79,13 @@ export default function VocabularyPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-1">
           <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-bold tracking-tight">Vocabulary</h1>
+            <h1 className="text-3xl font-bold tracking-tight">{t("vocab.title")}</h1>
             <Badge variant="secondary" className="text-sm">
               N2
             </Badge>
           </div>
           <p className="text-muted-foreground">
-            Master essential N2 vocabulary with interactive flashcards.
-            Click a card to flip it.
+            {t("vocab.subtitle")}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -93,7 +94,7 @@ export default function VocabularyPage() {
             className="gap-1.5 py-1.5 px-3 text-sm font-medium"
           >
             <BookOpen className="h-3.5 w-3.5" />
-            {learnedIds.size} / {vocabulary.length} learned
+            {learnedIds.size} / {vocabulary.length} {t("common.learned")}
           </Badge>
           <Button
             variant="outline"
@@ -102,19 +103,19 @@ export default function VocabularyPage() {
             onClick={shuffleCards}
           >
             <Shuffle className="h-3.5 w-3.5" />
-            Shuffle
+            {t("vocab.shuffle")}
           </Button>
         </div>
       </div>
 
       <Tabs defaultValue="all" className="space-y-6">
         <TabsList>
-          <TabsTrigger value="all">All Words</TabsTrigger>
+          <TabsTrigger value="all">{t("vocab.tabs.all")}</TabsTrigger>
           <TabsTrigger value="new">
-            New ({vocabulary.length - learnedIds.size})
+            {t("vocab.tabs.new", { count: vocabulary.length - learnedIds.size })}
           </TabsTrigger>
           <TabsTrigger value="learned">
-            Learned ({learnedIds.size})
+            {t("vocab.tabs.learned", { count: learnedIds.size })}
           </TabsTrigger>
         </TabsList>
 
@@ -152,10 +153,9 @@ export default function VocabularyPage() {
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted mb-4">
                 <BookOpen className="h-8 w-8 text-muted-foreground" />
               </div>
-              <h3 className="text-lg font-semibold">No words learned yet</h3>
+              <h3 className="text-lg font-semibold">{t("vocab.emptyLearned")}</h3>
               <p className="text-sm text-muted-foreground mt-1">
-                Flip a card and click &ldquo;Mark learned&rdquo; to track your
-                progress.
+                {t("vocab.emptyLearnedHint")}
               </p>
             </div>
           ) : (

@@ -16,6 +16,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
+import { useLanguage } from "@/components/providers/LanguageProvider";
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
@@ -24,6 +25,7 @@ export default function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const router = useRouter();
+  const { t } = useLanguage();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -38,13 +40,13 @@ export default function LoginForm() {
       });
 
       if (result?.error) {
-        setError("Invalid email or password");
+        setError(t("auth.invalidCredentials"));
       } else {
         router.push("/dashboard");
         router.refresh();
       }
     } catch {
-      setError("Something went wrong. Please try again.");
+      setError(t("auth.somethingWentWrong"));
     } finally {
       setIsLoading(false);
     }
@@ -55,7 +57,7 @@ export default function LoginForm() {
     try {
       await signIn("google", { callbackUrl: "/dashboard" });
     } catch {
-      setError("Google sign-in failed. Please try again.");
+      setError(t("auth.googleFailed"));
       setIsGoogleLoading(false);
     }
   }
@@ -67,10 +69,10 @@ export default function LoginForm() {
           <span className="text-2xl">🎌</span>
         </div>
         <CardTitle className="text-2xl font-bold tracking-tight">
-          Welcome back
+          {t("auth.welcomeBack")}
         </CardTitle>
         <CardDescription className="text-muted-foreground">
-          Sign in to continue your JLPT journey
+          {t("auth.signInSubtitle")}
         </CardDescription>
       </CardHeader>
 
@@ -105,7 +107,7 @@ export default function LoginForm() {
               />
             </svg>
           )}
-          Continue with Google
+          {t("auth.continueWithGoogle")}
         </Button>
 
         <div className="relative">
@@ -114,7 +116,7 @@ export default function LoginForm() {
           </div>
           <div className="relative flex justify-center text-xs uppercase">
             <span className="bg-card px-2 text-muted-foreground">
-              Or continue with email
+              {t("auth.orContinueWithEmail")}
             </span>
           </div>
         </div>
@@ -129,7 +131,7 @@ export default function LoginForm() {
 
           <div className="space-y-2">
             <Label htmlFor="email" className="text-sm font-medium">
-              Email
+              {t("auth.emailLabel")}
             </Label>
             <Input
               id="email"
@@ -145,7 +147,7 @@ export default function LoginForm() {
 
           <div className="space-y-2">
             <Label htmlFor="password" className="text-sm font-medium">
-              Password
+              {t("auth.passwordLabel")}
             </Label>
             <Input
               id="password"
@@ -161,17 +163,17 @@ export default function LoginForm() {
 
           <Button
             type="submit"
-            className="w-full h-11 font-medium"
+            className="w-full h-11 font-medium bg-primary text-white"
             disabled={isLoading}
             id="login-submit-btn"
           >
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Signing in...
+                {t("auth.signingIn")}
               </>
             ) : (
-              "Sign in"
+              t("auth.signInBtn")
             )}
           </Button>
         </form>
@@ -179,13 +181,13 @@ export default function LoginForm() {
 
       <CardFooter className="justify-center">
         <p className="text-sm text-muted-foreground">
-          Don&apos;t have an account?{" "}
+          {t("auth.dontHaveAccount")}{" "}
           <Link
             href="/register"
             className="font-medium text-primary underline-offset-4 hover:underline"
             id="register-link"
           >
-            Create one
+            {t("auth.createOne")}
           </Link>
         </p>
       </CardFooter>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
+import { useLanguage } from "@/components/providers/LanguageProvider";
 import {
   Card,
   CardContent,
@@ -21,6 +22,9 @@ import {
   Mail,
   ShieldAlert,
   Loader2,
+  Zap,
+  Star,
+  Lock,
 } from "lucide-react";
 import {
   ChartContainer,
@@ -29,6 +33,7 @@ import {
 } from "@/components/ui/chart";
 import { Bar, BarChart, XAxis, YAxis, CartesianGrid, Legend } from "recharts";
 import StatsCard from "@/components/dashboard/StatsCard";
+import { cn } from "@/lib/utils";
 
 interface ProfileData {
   name: string;
@@ -50,33 +55,65 @@ interface ProfileData {
   }>;
 }
 
-const chartConfig = {
-  words: {
-    label: "Từ vựng đã học",
-    color: "var(--chart-1)",
-  },
-  quizzes: {
-    label: "Quiz ngữ pháp",
-    color: "var(--chart-2)",
-  },
-  reading: {
-    label: "Bài đọc hiểu",
-    color: "var(--chart-3)",
-  },
-};
+interface BadgeInfo {
+  id: string;
+  name: string;
+  icon: string;
+  description: string;
+  requirement: string;
+}
+
+interface GamificationData {
+  exp: number;
+  level: number;
+  expToNext: {
+    current: number;
+    required: number;
+    progress: number;
+  };
+  currentStreak: number;
+  longestStreak: number;
+  earnedBadges: BadgeInfo[];
+  lockedBadges: BadgeInfo[];
+}
 
 export default function ProfilePage() {
+  const { t, language } = useLanguage();
+  const chartConfig = {
+    words: {
+      label: t("profile.chartWords"),
+      color: "var(--chart-1)",
+    },
+    quizzes: {
+      label: t("profile.chartQuizzes"),
+      color: "var(--chart-2)",
+    },
+    reading: {
+      label: t("profile.chartReading"),
+      color: "var(--chart-3)",
+    },
+  };
   const { data: session, status } = useSession();
   const [profile, setProfile] = useState<ProfileData | null>(null);
+  const [gamification, setGamification] = useState<GamificationData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchProfile() {
+    async function fetchData() {
       try {
-        const response = await fetch("/api/user/profile");
-        if (response.ok) {
-          const data = await response.json();
+        const [profileRes, gamRes] = await Promise.all([
+          fetch("/api/user/profile"),
+          fetch("/api/user/gamification"),
+        ]);
+
+        if (profileRes.ok) {
+          const data = await profileRes.json();
           setProfile(data);
+        }
+
+        if (gamRes.ok) {
+          const gamData = await gamRes.json();
+          setGamification(gamData);
         }
       } catch (err) {
         console.error("Failed to load profile data", err);
@@ -86,7 +123,7 @@ export default function ProfilePage() {
     }
 
     if (status === "authenticated") {
-      fetchProfile();
+      fetchData();
     } else if (status === "unauthenticated") {
       setLoading(false);
     }
@@ -97,7 +134,9 @@ export default function ProfilePage() {
       <div className="flex h-[calc(100vh-4rem)] items-center justify-center">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground font-medium">Đang tải thông tin cá nhân...</p>
+          <p className="text-sm text-muted-foreground font-medium">
+            {t("profile.loading")}
+          </p>
         </div>
       </div>
     );
@@ -109,9 +148,11 @@ export default function ProfilePage() {
         <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10 text-destructive">
           <ShieldAlert className="h-6 w-6" />
         </div>
-        <h2 className="text-xl font-bold text-foreground">Bạn chưa đăng nhập</h2>
+        <h2 className="text-xl font-bold text-foreground">
+          {t("profile.unauthenticated")}
+        </h2>
         <p className="text-sm text-muted-foreground">
-          Vui lòng đăng nhập để xem thông tin hồ sơ và quá trình học tập.
+          {t("profile.unauthenticatedDesc")}
         </p>
       </div>
     );
@@ -126,11 +167,24 @@ export default function ProfilePage() {
         .slice(0, 2)
     : "U";
 
-  const formattedDate = new Date(profile.createdAt).toLocaleDateString("vi-VN", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+  const formattedDate = new Date(profile.createdAt).toLocaleDateString(
+    language === "vi" ? "vi-VN" : "en-US",
+    {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }
+  );
+
+  const exp = gamification?.exp ?? 0;
+  const level = gamification?.level ?? 1;
+  const expProgress = gamification?.expToNext ?? {
+    current: 0,
+    required: 100,
+    progress: 0,
+  };
+  const streak = gamification?.currentStreak ?? profile.stats.streak;
+  const longestStreak = gamification?.longestStreak ?? streak;
 
   return (
     <div className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
@@ -143,13 +197,28 @@ export default function ProfilePage() {
         <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-r from-violet-600/20 via-fuchsia-500/20 to-rose-600/20" />
         <CardContent className="pt-16 pb-6 px-6 relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-5">
-            <Avatar className="h-20 w-20 ring-4 ring-background shadow-xl">
-              <AvatarFallback className="bg-primary/10 text-primary text-2xl font-bold">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
+            <div className="relative">
+              <Avatar className="h-20 w-20 ring-4 ring-background shadow-xl">
+                <AvatarFallback className="bg-primary/10 text-primary text-2xl font-bold">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+              {/* Level badge on avatar */}
+              <div className="absolute -bottom-1 -right-1 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[10px] font-extrabold rounded-full h-7 w-7 flex items-center justify-center ring-2 ring-background shadow-md">
+                {level}
+              </div>
+            </div>
             <div className="space-y-1.5">
-              <h2 className="text-2xl font-bold text-foreground">{profile.name}</h2>
+              <div className="flex items-center gap-2">
+                <h2 className="text-2xl font-bold text-foreground">
+                  {profile.name}
+                </h2>
+                {streak > 0 && (
+                  <span className="text-lg" title={`${streak} day streak`}>
+                    🔥
+                  </span>
+                )}
+              </div>
               <div className="flex flex-wrap gap-2 items-center text-sm text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <Mail className="h-3.5 w-3.5" />
@@ -158,7 +227,7 @@ export default function ProfilePage() {
                 <span className="hidden sm:inline">•</span>
                 <span className="flex items-center gap-1">
                   <Calendar className="h-3.5 w-3.5" />
-                  Tham gia từ {formattedDate}
+                  {t("profile.joined", { date: formattedDate })}
                 </span>
               </div>
             </div>
@@ -166,56 +235,135 @@ export default function ProfilePage() {
 
           <div className="flex flex-wrap gap-3 items-center">
             <Badge className="bg-violet-500/10 text-violet-500 border border-violet-500/20 px-3 py-1 font-bold text-sm">
-              Mục tiêu: {profile.targetLevel}
+              {t("profile.target", { level: profile.targetLevel })}
+            </Badge>
+            <Badge className="bg-amber-500/10 text-amber-500 border border-amber-500/20 px-3 py-1 font-bold text-sm">
+              <Zap className="h-3 w-3 mr-1" />
+              {exp} EXP
             </Badge>
             <Badge className="bg-amber-500/10 text-amber-500 border border-amber-500/20 px-3 py-1 font-bold text-sm uppercase">
-              Tài khoản: {profile.provider}
+              {t("profile.provider", { provider: profile.provider })}
             </Badge>
           </div>
         </CardContent>
       </Card>
 
       {/* Stats Cards Row */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <StatsCard
-          title="Từ vựng đã học"
+          title={t("profile.vocabLearned")}
           value={profile.stats.vocabLearnedCount}
-          description="tổng số từ tích lũy"
+          description={t("profile.vocabLearnedDesc")}
           icon={BookOpen}
           color="blue"
         />
         <StatsCard
-          title="Quiz đã làm"
+          title={t("profile.quizzesDone")}
           value={profile.stats.quizzesCount}
-          description="bài kiểm tra hoàn thành"
+          description={t("profile.quizzesDoneDesc")}
           icon={Brain}
           color="violet"
         />
         <StatsCard
-          title="Điểm số trung bình"
+          title={t("profile.quizAverage")}
           value={`${profile.stats.quizAverage}%`}
-          description="trên toàn hệ thống"
+          description={t("profile.quizAverageDesc")}
           icon={Trophy}
           color="amber"
         />
         <StatsCard
-          title="Chuỗi ngày học"
-          value={`${profile.stats.streak} ngày`}
-          description="duy trì liên tục"
+          title={t("profile.streakTitle")}
+          value={`${streak} ${streak === 1 ? t("dashboard.day") : t("dashboard.days")}`}
+          description={t("profile.longestStreak", { count: longestStreak })}
           icon={Flame}
           color="rose"
         />
+        <StatsCard
+          title={t("profile.levelExpTitle")}
+          value={`Lv.${level}`}
+          description={`${expProgress.current}/${expProgress.required} EXP`}
+          icon={Star}
+          color="amber"
+        />
       </div>
+
+      {/* Achievement Badges Showcase */}
+      <Card className="glass-card border-none">
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold flex items-center gap-2">
+            <Trophy className="h-5 w-5 text-amber-500" />
+            {t("profile.badgesTitle")}
+          </CardTitle>
+          <CardDescription>
+            {t("profile.badgesDesc")}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {/* Earned Badges */}
+            {gamification?.earnedBadges?.map((badge) => (
+              <div
+                key={badge.id}
+                className="relative flex items-center gap-4 p-4 rounded-xl border border-amber-500/20 bg-amber-500/5 shadow-sm shadow-amber-500/10 transition-all hover:shadow-amber-500/20 hover:scale-[1.02]"
+              >
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 text-2xl shadow-inner">
+                  {badge.icon}
+                </div>
+                <div className="space-y-0.5">
+                  <p className="text-sm font-bold text-foreground">
+                    {badge.name}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {badge.description}
+                  </p>
+                </div>
+                {/* Glow dot */}
+                <div className="absolute top-2 right-2 h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
+              </div>
+            ))}
+
+            {/* Locked Badges */}
+            {gamification?.lockedBadges?.map((badge) => (
+              <div
+                key={badge.id}
+                className="relative flex items-center gap-4 p-4 rounded-xl border border-border/40 bg-muted/10 opacity-60 transition-all hover:opacity-80"
+              >
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-muted/20 text-2xl grayscale relative">
+                  {badge.icon}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Lock className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                </div>
+                <div className="space-y-0.5">
+                  <p className="text-sm font-bold text-muted-foreground">
+                    {badge.name}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground/70">
+                    {badge.requirement}
+                  </p>
+                </div>
+              </div>
+            ))}
+
+            {/* Fallback when gamification not loaded */}
+            {!gamification && (
+              <p className="text-sm text-muted-foreground col-span-full text-center py-4">
+                {t("profile.noBadges")}
+              </p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Learning History Chart */}
       <Card className="glass-card border-none">
         <CardHeader>
           <CardTitle className="text-lg font-semibold flex items-center gap-2">
             <Flame className="h-5 w-5 text-rose-500" />
-            Lịch sử học tập 7 ngày qua
+            {t("profile.chartTitle")}
           </CardTitle>
           <CardDescription>
-            Theo dõi chi tiết lượng kiến thức bạn đã thu nạp trong tuần này
+            {t("profile.chartDesc")}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -246,29 +394,33 @@ export default function ProfilePage() {
                   content={<ChartTooltipContent />}
                   cursor={{ fill: "var(--accent)", opacity: 0.15 }}
                 />
-                <Legend 
-                  verticalAlign="top" 
-                  height={36} 
+                <Legend
+                  verticalAlign="top"
+                  height={36}
                   iconType="circle"
-                  formatter={(value) => <span className="text-xs font-semibold text-foreground">{value}</span>}
+                  formatter={(value) => (
+                    <span className="text-xs font-semibold text-foreground">
+                      {value}
+                    </span>
+                  )}
                 />
                 <Bar
                   dataKey="words"
-                  name="Từ vựng đã học"
+                  name={t("profile.chartWords")}
                   fill="var(--color-words)"
                   radius={[4, 4, 0, 0]}
                   maxBarSize={30}
                 />
                 <Bar
                   dataKey="quizzes"
-                  name="Quiz ngữ pháp"
+                  name={t("profile.chartQuizzes")}
                   fill="var(--color-quizzes)"
                   radius={[4, 4, 0, 0]}
                   maxBarSize={30}
                 />
                 <Bar
                   dataKey="reading"
-                  name="Bài đọc hiểu"
+                  name={t("profile.chartReading")}
                   fill="var(--color-reading)"
                   radius={[4, 4, 0, 0]}
                   maxBarSize={30}

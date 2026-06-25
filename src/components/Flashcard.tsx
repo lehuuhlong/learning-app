@@ -4,8 +4,10 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, RotateCcw, Volume2, HelpCircle } from "lucide-react";
+import { Volume2, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { predictIntervals } from "@/lib/srs";
+import { useLanguage } from "@/components/providers/LanguageProvider";
 
 interface VocabularyItem {
   _id: string;
@@ -14,23 +16,77 @@ interface VocabularyItem {
   meaning: string;
   part_of_speech: string[];
   level: string;
+  srs?: {
+    easeFactor: number;
+    interval: number;
+    repetitions: number;
+    isReview: boolean;
+  };
 }
 
 interface FlashcardProps {
   word: VocabularyItem;
-  onAction: (status: "learned" | "review") => void;
+  onRate: (quality: 0 | 2 | 3 | 5) => void;
 }
 
-export default function Flashcard({ word, onAction }: FlashcardProps) {
+export default function Flashcard({ word, onRate }: FlashcardProps) {
   const [isFlipped, setIsFlipped] = useState(false);
+  const { t } = useLanguage();
+
+  const ratingButtons = [
+    {
+      quality: 0 as const,
+      label: t("vocab.sm2.again"),
+      sublabel: t("vocab.sm2.againSub"),
+      className:
+        "border-rose-500/30 text-rose-500 hover:bg-rose-500/10 hover:border-rose-500/50",
+      icon: "🔴",
+      keyName: "again",
+    },
+    {
+      quality: 2 as const,
+      label: t("vocab.sm2.hard"),
+      sublabel: t("vocab.sm2.hardSub"),
+      className:
+        "border-orange-500/30 text-orange-500 hover:bg-orange-500/10 hover:border-orange-500/50",
+      icon: "🟠",
+      keyName: "hard",
+    },
+    {
+      quality: 3 as const,
+      label: t("vocab.sm2.good"),
+      sublabel: t("vocab.sm2.goodSub"),
+      className:
+        "bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white border-none shadow-lg",
+      icon: "🟢",
+      keyName: "good",
+    },
+    {
+      quality: 5 as const,
+      label: t("vocab.sm2.easy"),
+      sublabel: t("vocab.sm2.easySub"),
+      className:
+        "bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white border-none shadow-lg",
+      icon: "🔵",
+      keyName: "easy",
+    },
+  ];
+
+  // Get predicted intervals for button hints
+  const srs = word.srs || { easeFactor: 2.5, interval: 0, repetitions: 0 };
+  const intervals = predictIntervals(
+    srs.repetitions,
+    srs.easeFactor,
+    srs.interval
+  );
 
   const speak = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent flipping when clicking speak button
     if (typeof window === "undefined" || !window.speechSynthesis) return;
-    
+
     // Cancel any active speaking
     window.speechSynthesis.cancel();
-    
+
     const utterance = new SpeechSynthesisUtterance(word.word);
     utterance.lang = "ja-JP";
     utterance.rate = 0.85; // Slightly slower for clear learning pronunciation
@@ -41,25 +97,52 @@ export default function Flashcard({ word, onAction }: FlashcardProps) {
     setIsFlipped(!isFlipped);
   };
 
+  const handleRate = (quality: 0 | 2 | 3 | 5) => {
+    setIsFlipped(false);
+    setTimeout(() => onRate(quality), 250);
+  };
+
+  const intervalMap: Record<string, string> = {
+    again: intervals.again,
+    hard: intervals.hard,
+    good: intervals.good,
+    easy: intervals.easy,
+  };
+
   return (
     <div className="flex flex-col items-center w-full max-w-md mx-auto space-y-6">
+      {/* SRS Status Badge */}
+      {word.srs && (
+        <div className="flex items-center gap-2">
+          <Badge
+            variant="outline"
+            className={cn(
+              "text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5",
+              word.srs.isReview
+                ? "border-amber-500/30 text-amber-500 bg-amber-500/5"
+                : "border-emerald-500/30 text-emerald-500 bg-emerald-500/5"
+            )}
+          >
+            {word.srs.isReview ? `📖 ${t("vocab.reviewBadge")}` : `✨ ${t("vocab.newWordBadge")}`}
+          </Badge>
+        </div>
+      )}
+
       {/* 3D Card Container */}
-      <div 
+      <div
         className="w-full h-80 cursor-pointer perspective-1000"
         onClick={handleFlip}
       >
-        <div 
+        <div
           className={cn(
             "relative w-full h-full duration-500 preserve-3d transition-transform ease-in-out",
             isFlipped && "rotate-y-180"
           )}
         >
           {/* Card Front */}
-          <Card 
-            className="absolute inset-0 flex flex-col items-center justify-center p-6 border border-white/10 bg-white/5 dark:bg-black/40 backdrop-blur-md shadow-2xl backface-hidden rounded-2xl hover:border-primary/45 transition-all duration-300"
-          >
+          <Card className="absolute inset-0 flex flex-col items-center justify-center p-6 border border-white/10 bg-white/5 dark:bg-black/40 backdrop-blur-md shadow-2xl backface-hidden rounded-2xl hover:border-primary/45 transition-all duration-300">
             {/* Level Badge */}
-            <Badge 
+            <Badge
               variant="secondary"
               className="absolute top-4 right-4 text-xs font-semibold bg-primary/10 text-primary border border-primary/20"
             >
@@ -83,16 +166,14 @@ export default function Flashcard({ word, onAction }: FlashcardProps) {
 
             {/* Hint */}
             <p className="absolute bottom-6 text-xs text-muted-foreground/60 bg-white/5 dark:bg-white/5 border border-white/10 px-3 py-1 rounded-full animate-pulse">
-              Click card to reveal translation
+              {t("vocab.clickToReveal")}
             </p>
           </Card>
 
           {/* Card Back */}
-          <Card 
-            className="absolute inset-0 flex flex-col p-6 border border-white/10 bg-white/5 dark:bg-black/40 backdrop-blur-md shadow-2xl backface-hidden rotate-y-180 rounded-2xl hover:border-primary/45 transition-all duration-300"
-          >
+          <Card className="absolute inset-0 flex flex-col p-6 border border-white/10 bg-white/5 dark:bg-black/40 backdrop-blur-md shadow-2xl backface-hidden rotate-y-180 rounded-2xl hover:border-primary/45 transition-all duration-300">
             {/* Level Badge */}
-            <Badge 
+            <Badge
               variant="secondary"
               className="absolute top-4 right-4 text-xs font-semibold bg-primary/10 text-primary border border-primary/20"
             >
@@ -125,7 +206,11 @@ export default function Flashcard({ word, onAction }: FlashcardProps) {
               {word.part_of_speech && word.part_of_speech.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 justify-center mt-2">
                   {word.part_of_speech.map((pos) => (
-                    <Badge key={pos} variant="outline" className="text-[10px] bg-white/5 border-white/10 text-muted-foreground">
+                    <Badge
+                      key={pos}
+                      variant="outline"
+                      className="text-[10px] bg-white/5 border-white/10 text-muted-foreground"
+                    >
                       {pos}
                     </Badge>
                   ))}
@@ -144,38 +229,33 @@ export default function Flashcard({ word, onAction }: FlashcardProps) {
                 }}
                 className="text-xs text-muted-foreground/60 hover:text-primary gap-1"
               >
-                <RotateCcw className="h-3 w-3" /> Flip back
+                <RotateCcw className="h-3 w-3" /> {t("vocab.flipBack")}
               </Button>
             </div>
           </Card>
         </div>
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex gap-4 w-full justify-center">
-        <Button
-          variant="outline"
-          size="lg"
-          onClick={() => {
-            setIsFlipped(false);
-            setTimeout(() => onAction("review"), 250);
-          }}
-          className="flex-1 gap-2 border-rose-500/30 text-rose-500 hover:bg-rose-500/10 hover:border-rose-500/50 max-w-[180px] font-semibold rounded-xl transition-all hover:scale-[1.02]"
-        >
-          <HelpCircle className="h-4.5 w-4.5" />
-          Need Review
-        </Button>
-        <Button
-          size="lg"
-          onClick={() => {
-            setIsFlipped(false);
-            setTimeout(() => onAction("learned"), 250);
-          }}
-          className="flex-1 gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white border-none shadow-lg max-w-[180px] font-semibold rounded-xl transition-all hover:scale-[1.02]"
-        >
-          <CheckCircle2 className="h-4.5 w-4.5" />
-          Learned
-        </Button>
+      {/* SM-2 Rating Buttons */}
+      <div className="grid grid-cols-4 gap-2 w-full">
+        {ratingButtons.map((btn) => (
+          <Button
+            key={btn.quality}
+            variant="outline"
+            size="sm"
+            onClick={() => handleRate(btn.quality)}
+            className={cn(
+              "flex flex-col items-center gap-0.5 h-auto py-2.5 rounded-xl font-semibold transition-all hover:scale-[1.03]",
+              btn.className
+            )}
+          >
+            <span className="text-xs font-bold">{btn.label}</span>
+            <span className="text-[10px] opacity-70">{btn.sublabel}</span>
+            <span className="text-[9px] opacity-50 mt-0.5">
+              {intervalMap[btn.keyName]}
+            </span>
+          </Button>
+        ))}
       </div>
     </div>
   );

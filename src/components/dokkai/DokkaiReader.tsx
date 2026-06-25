@@ -26,14 +26,13 @@ import {
   Sparkles,
   Clock,
   BookOpen,
-  HelpCircle,
   Loader2,
   Brain,
   Lightbulb,
-  ArrowLeftRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { useLanguage } from "@/components/providers/LanguageProvider";
 
 interface Question {
   id: number;
@@ -73,6 +72,8 @@ export default function DokkaiReader() {
   const [explanations, setExplanations] = useState<Record<number, AIExplanation>>({});
   const [expandedAI, setExpandedAI] = useState<Record<number, boolean>>({});
 
+  const { t } = useLanguage();
+
   // 1. Fetch user level and then load dynamic news
   useEffect(() => {
     async function loadDokkai() {
@@ -91,7 +92,7 @@ export default function DokkaiReader() {
 
         // Fetch news article based on level
         const newsRes = await fetch(`/api/dokkai/news?level=${level}`);
-        if (!newsRes.ok) throw new Error("Không thể tải tin tức Dokkai");
+        if (!newsRes.ok) throw new Error(t("dokkai.errorTitle"));
         const newsData = await newsRes.json();
         
         setPassageData(newsData);
@@ -99,13 +100,13 @@ export default function DokkaiReader() {
         setTimerActive(true);
       } catch (err: any) {
         console.error(err);
-        setError(err.message || "Đã xảy ra lỗi");
+        setError(err.message || t("common.errorOccurred"));
       } finally {
         setLoading(false);
       }
     }
     loadDokkai();
-  }, []);
+  }, [t]);
 
   // 2. Timer countdown effect
   useEffect(() => {
@@ -233,7 +234,9 @@ export default function DokkaiReader() {
       <div className="flex h-full items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground font-medium">Tải tin tức & soạn câu hỏi JLPT {targetLevel}...</p>
+          <p className="text-sm text-muted-foreground font-medium">
+            {t("dokkai.loading", { level: targetLevel })}
+          </p>
         </div>
       </div>
     );
@@ -244,10 +247,10 @@ export default function DokkaiReader() {
       <div className="flex h-full items-center justify-center bg-background text-center p-6">
         <div className="space-y-4 max-w-md">
           <XCircle className="h-12 w-12 text-destructive mx-auto" />
-          <h3 className="text-lg font-bold text-foreground">Không thể tải bài đọc Dokkai</h3>
-          <p className="text-sm text-muted-foreground">{error || "Vui lòng kiểm tra lại kết nối mạng."}</p>
+          <h3 className="text-lg font-bold text-foreground">{t("dokkai.errorTitle")}</h3>
+          <p className="text-sm text-muted-foreground">{error || t("common.errorOccurred")}</p>
           <Button onClick={handleReset} variant="outline" className="gap-2">
-            <RotateCcw className="h-4 w-4" /> Thử lại
+            <RotateCcw className="h-4 w-4" /> {t("common.retry")}
           </Button>
         </div>
       </div>
@@ -278,11 +281,11 @@ export default function DokkaiReader() {
               <div className="flex items-center gap-3">
                 <BookOpen className="h-5 w-5 text-emerald-500" />
                 <h2 className="text-lg font-bold tracking-tight bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
-                  Báo chí Nhật Bản hôm nay
+                  {t("dokkai.leftHeader")}
                 </h2>
               </div>
               <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 font-bold px-3 py-1 text-xs">
-                Dokkai {targetLevel}
+                {t("nav.dokkai")} {targetLevel}
               </Badge>
             </div>
 
@@ -321,8 +324,8 @@ export default function DokkaiReader() {
             {/* Sticky Header with Timer */}
             <div className="flex items-center justify-between border-b border-border/20 px-6 py-4 bg-black/10 dark:bg-black/20 sticky top-0 z-10">
               <div className="space-y-1">
-                <h3 className="font-bold text-foreground text-sm sm:text-base">Câu hỏi đọc hiểu</h3>
-                <p className="text-xs text-muted-foreground">Chọn một đáp án đúng nhất cho mỗi câu</p>
+                <h3 className="font-bold text-foreground text-sm sm:text-base">{t("dokkai.rightHeader")}</h3>
+                <p className="text-xs text-muted-foreground">{t("dokkai.rightSubtitle")}</p>
               </div>
 
               {/* Countdown Timer */}
@@ -359,7 +362,7 @@ export default function DokkaiReader() {
                           <span className="flex h-5.5 w-5.5 items-center justify-center rounded-full bg-primary/10 text-xs text-primary font-bold">
                             {qIndex + 1}
                           </span>
-                          Câu {qIndex + 1} / {passageData.questions.length}
+                          {t("dokkai.questionLabel", { index: qIndex + 1, total: passageData.questions.length })}
                         </CardTitle>
                         <div 
                           className="text-[15px] font-bold text-foreground leading-relaxed pt-1" 
@@ -434,12 +437,12 @@ export default function DokkaiReader() {
                                 {explaining[q.id] ? (
                                   <>
                                     <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                    Đang kết nối AI Tutor...
+                                    {t("dokkai.connectingAi")}
                                   </>
                                 ) : (
                                   <>
                                     <Sparkles className="h-3.5 w-3.5" />
-                                    Giải thích bằng AI (AI Explanation)
+                                    {t("dokkai.explainWithAi")}
                                   </>
                                 )}
                               </Button>
@@ -454,10 +457,10 @@ export default function DokkaiReader() {
                                 >
                                   <span className="flex items-center gap-2">
                                     <Brain className="h-4 w-4 text-rose-500" />
-                                    Chi tiết giải thích từ AI
+                                    {t("dokkai.aiTitle")}
                                   </span>
                                   <span className="text-[10px] text-muted-foreground font-normal">
-                                    {expandedAI[q.id] ? "Thu gọn" : "Mở rộng"}
+                                    {expandedAI[q.id] ? t("dokkai.collapse") : t("dokkai.expand")}
                                   </span>
                                 </button>
 
@@ -467,7 +470,7 @@ export default function DokkaiReader() {
                                     <div className="space-y-1">
                                       <span className="flex items-center gap-1 text-[11px] font-bold text-emerald-500 uppercase tracking-wide">
                                         <CheckCircle2 className="h-3 w-3" />
-                                        Tại sao đáp án này đúng?
+                                        {t("dokkai.whyCorrect")}
                                       </span>
                                       <p className="pl-4 text-foreground/80">{explanations[q.id].whyCorrect}</p>
                                     </div>
@@ -477,7 +480,7 @@ export default function DokkaiReader() {
                                     <div className="space-y-1">
                                       <span className="flex items-center gap-1 text-[11px] font-bold text-rose-500 uppercase tracking-wide">
                                         <XCircle className="h-3 w-3" />
-                                        Tại sao đáp án khác chưa đúng?
+                                        {t("dokkai.whyWrong")}
                                       </span>
                                       <p className="pl-4 text-foreground/80">{explanations[q.id].whyWrong}</p>
                                     </div>
@@ -487,7 +490,7 @@ export default function DokkaiReader() {
                                     <div className="space-y-1">
                                       <span className="flex items-center gap-1 text-[11px] font-bold text-violet-500 uppercase tracking-wide">
                                         <Lightbulb className="h-3 w-3 text-amber-500" />
-                                        Sắc thái ngữ pháp & từ vựng
+                                        {t("dokkai.nuance")}
                                       </span>
                                       <p className="pl-4 text-foreground/80 italic">{explanations[q.id].nuance}</p>
                                     </div>
@@ -514,7 +517,7 @@ export default function DokkaiReader() {
                     className="w-full gap-2 font-bold shadow-md bg-gradient-to-r from-violet-600 to-rose-600 hover:from-violet-700 hover:to-rose-700 text-white rounded-xl py-5"
                   >
                     <CheckCircle2 className="h-4.5 w-4.5" />
-                    Nộp bài (Submit Answers)
+                    {t("dokkai.submitAnswers")}
                   </Button>
                 ) : (
                   <div className="flex gap-3">
@@ -524,24 +527,27 @@ export default function DokkaiReader() {
                       className="flex-1 gap-2 font-bold border-border/80 rounded-xl"
                     >
                       <RotateCcw className="h-4 w-4" />
-                      Làm bài mới
+                      {t("dokkai.tryAnother")}
                     </Button>
                     <Link href="/dashboard" className="flex-1">
                       <Button className="w-full font-bold bg-primary text-white rounded-xl">
-                        Về Dashboard
+                        {t("common.backToDashboard")}
                       </Button>
                     </Link>
                   </div>
                 )}
                 {!allAnswered && !showResults && (
                   <p className="text-center text-[10px] text-muted-foreground">
-                    Trả lời tất cả các câu hỏi để mở khóa tính năng nộp bài.
+                    {t("dokkai.unlockedHint")}
                   </p>
                 )}
                 {showResults && (
                   <p className="text-center text-xs font-semibold text-foreground">
-                    Kết quả của bạn: <span className={cn(correctCount === passageData.questions.length ? "text-emerald-500" : "text-amber-500")}>{correctCount} / {passageData.questions.length} câu đúng</span> (
-                    {Math.round((correctCount / passageData.questions.length) * 100)}%)
+                    {t("dokkai.resultText", {
+                      score: correctCount,
+                      total: passageData.questions.length,
+                      percent: Math.round((correctCount / passageData.questions.length) * 100),
+                    })}
                   </p>
                 )}
               </div>

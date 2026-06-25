@@ -54,9 +54,9 @@ export async function POST(request: NextRequest) {
 
     // 4. Initialize Gemini SDK
     const genAI = new GoogleGenerativeAI(geminiApiKey);
-    // Use gemini-2.5-flash for high-performance and speed
+    // Use gemini-1.5-flash for high-performance and speed
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash",
+      model: "gemini-1.5-flash",
       generationConfig: {
         responseMimeType: "application/json",
       },

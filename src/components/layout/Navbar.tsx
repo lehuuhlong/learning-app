@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,21 +31,47 @@ import {
   Settings,
   Sparkles,
   GraduationCap,
+  Flame,
+  Star,
 } from "lucide-react";
-import { useState } from "react";
 import { ThemeToggle } from "./ThemeToggle";
-
-const navLinks = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/vocabulary", label: "Vocabulary", icon: BookOpen },
-  { href: "/grammar", label: "Grammar Quiz", icon: GraduationCap },
-  { href: "/dokkai", label: "Dokkai", icon: FileText },
-];
+import { LanguageToggle } from "./LanguageToggle";
+import { useLanguage } from "@/components/providers/LanguageProvider";
 
 export default function Navbar() {
   const pathname = usePathname();
   const { data: session } = useSession();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [streak, setStreak] = useState(0);
+  const [level, setLevel] = useState(1);
+  const { t } = useLanguage();
+
+  const navLinks = [
+    { href: "/dashboard", label: t("nav.dashboard"), icon: LayoutDashboard },
+    { href: "/vocabulary", label: t("nav.vocabulary"), icon: BookOpen },
+    { href: "/grammar", label: t("nav.grammar"), icon: GraduationCap },
+    { href: "/dokkai", label: t("nav.dokkai"), icon: FileText },
+  ];
+
+  // Fetch gamification data for streak & level display
+  useEffect(() => {
+    if (!session?.user) return;
+
+    async function fetchGamification() {
+      try {
+        const res = await fetch("/api/user/gamification");
+        if (res.ok) {
+          const data = await res.json();
+          setStreak(data.currentStreak || 0);
+          setLevel(data.level || 1);
+        }
+      } catch {
+        // Silent fail — decorative only
+      }
+    }
+
+    fetchGamification();
+  }, [session]);
 
   const initials = session?.user?.name
     ? session.user.name
@@ -96,10 +124,24 @@ export default function Navbar() {
           })}
         </nav>
 
-        {/* Right side: User menu & Theme toggle */}
+        {/* Right side: Streak + Level + User menu & Theme toggle */}
         <div className="flex items-center gap-3">
+          {/* Streak Fire Indicator */}
+          {session?.user && streak > 0 && (
+            <div
+              className="hidden sm:flex items-center gap-1 px-2 py-1 rounded-full bg-orange-500/10 border border-orange-500/20"
+              title={`${streak} ${streak === 1 ? t("nav.dayStreak") : t("nav.daysStreak")}`}
+            >
+              <Flame className="h-3.5 w-3.5 text-orange-500 animate-pulse" />
+              <span className="text-xs font-bold text-orange-500">
+                {streak}
+              </span>
+            </div>
+          )}
+
+          <LanguageToggle />
           <ThemeToggle />
-          
+
           {session?.user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -117,6 +159,12 @@ export default function Navbar() {
                       {initials}
                     </AvatarFallback>
                   </Avatar>
+                  {/* Level pip */}
+                  {level > 1 && (
+                    <div className="absolute -bottom-0.5 -right-0.5 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[8px] font-extrabold rounded-full h-4 w-4 flex items-center justify-center ring-1 ring-background">
+                      {level}
+                    </div>
+                  )}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
@@ -128,9 +176,18 @@ export default function Navbar() {
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col space-y-0.5">
-                    <p className="text-sm font-medium leading-none">
-                      {session.user.name}
-                    </p>
+                    <div className="flex items-center gap-1.5">
+                      <p className="text-sm font-medium leading-none">
+                        {session.user.name}
+                      </p>
+                      <Badge
+                        variant="outline"
+                        className="text-[9px] px-1.5 py-0 h-4 bg-amber-500/10 text-amber-500 border-amber-500/20 font-bold"
+                      >
+                        <Star className="h-2 w-2 mr-0.5" />
+                        Lv.{level}
+                      </Badge>
+                    </div>
                     <p className="text-xs text-muted-foreground leading-none">
                       {session.user.email}
                     </p>
@@ -140,13 +197,13 @@ export default function Navbar() {
                 <DropdownMenuItem asChild>
                   <Link href="/profile" className="cursor-pointer gap-2">
                     <User className="h-4 w-4" />
-                    Profile
+                    {t("nav.profile")}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link href="/settings" className="cursor-pointer gap-2">
                     <Settings className="h-4 w-4" />
-                    Settings
+                    {t("nav.settings")}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
@@ -156,14 +213,14 @@ export default function Navbar() {
                   id="logout-btn"
                 >
                   <LogOut className="h-4 w-4" />
-                  Sign out
+                  {t("nav.signOut")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
             <Link href="/login">
               <Button size="sm" className="font-medium" id="nav-signin-btn">
-                Sign in
+                {t("nav.signIn")}
               </Button>
             </Link>
           )}

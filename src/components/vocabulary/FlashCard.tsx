@@ -4,7 +4,8 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, RotateCcw, Volume2 } from "lucide-react";
+import { CheckCircle2, RotateCcw } from "lucide-react";
+import { useLanguage } from "@/components/providers/LanguageProvider";
 
 interface VocabularyItem {
   _id: string;
@@ -30,6 +31,7 @@ export default function FlashCard({
   onMarkLearned,
 }: FlashCardProps) {
   const [isFlipped, setIsFlipped] = useState(false);
+  const { t } = useLanguage();
 
   return (
     <div
@@ -75,7 +77,7 @@ export default function FlashCard({
 
           {/* Hint */}
           <p className="absolute bottom-4 text-xs font-medium text-violet-500/60 dark:text-violet-400/60 bg-violet-500/5 dark:bg-violet-400/5 px-2.5 py-1 rounded-full border border-violet-500/10">
-            Click to reveal meaning
+            {t("vocab.clickToReveal")}
           </p>
         </Card>
 
@@ -137,7 +139,7 @@ export default function FlashCard({
               }}
             >
               <RotateCcw className="h-3 w-3" />
-              Flip back
+              {t("vocab.flipBack")}
             </Button>
             {!isLearned && onMarkLearned && (
               <Button
@@ -149,7 +151,7 @@ export default function FlashCard({
                 }}
               >
                 <CheckCircle2 className="h-3 w-3" />
-                Mark learned
+                {t("vocab.markLearned")}
               </Button>
             )}
           </div>

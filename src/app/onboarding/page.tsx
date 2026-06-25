@@ -7,11 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Sparkles, GraduationCap } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/components/providers/LanguageProvider";
 
 interface JLPTLevelOption {
   level: "N5" | "N4" | "N3" | "N2" | "N1";
-  title: string;
-  description: string;
   badgeColor: string;
   hoverGlow: string;
 }
@@ -19,36 +18,26 @@ interface JLPTLevelOption {
 const levels: JLPTLevelOption[] = [
   {
     level: "N5",
-    title: "JLPT N5 (Sơ cấp 1)",
-    description: "Nhập môn tiếng Nhật cơ bản. Học khoảng 100 chữ Kanji và 800 từ vựng cơ bản.",
     badgeColor: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
     hoverGlow: "hover:border-emerald-500/30 group-hover:shadow-emerald-500/5 from-emerald-500/[0.03]"
   },
   {
     level: "N4",
-    title: "JLPT N4 (Sơ cấp 2)",
-    description: "Hiểu đàm thoại căn bản hàng ngày. Học khoảng 300 chữ Kanji và 1500 từ vựng.",
     badgeColor: "bg-teal-500/10 text-teal-500 border-teal-500/20",
     hoverGlow: "hover:border-teal-500/30 group-hover:shadow-teal-500/5 from-teal-500/[0.03]"
   },
   {
     level: "N3",
-    title: "JLPT N3 (Trung cấp)",
-    description: "Cầu nối lên cao cấp. Đọc hiểu báo chí cơ bản. Học khoảng 650 Kanji và 3700 từ vựng.",
     badgeColor: "bg-blue-500/10 text-blue-500 border-blue-500/20",
     hoverGlow: "hover:border-blue-500/30 group-hover:shadow-blue-500/5 from-blue-500/[0.03]"
   },
   {
     level: "N2",
-    title: "JLPT N2 (Thượng trung cấp)",
-    description: "Đọc hiểu tốt, giao tiếp lưu loát công sở. Học khoảng 1000 Kanji và 6000 từ vựng.",
     badgeColor: "bg-violet-500/10 text-violet-500 border-violet-500/20",
     hoverGlow: "hover:border-violet-500/30 group-hover:shadow-violet-500/5 from-violet-500/[0.03]"
   },
   {
     level: "N1",
-    title: "JLPT N1 (Cao cấp)",
-    description: "Cấp độ cao nhất. Đọc hiểu văn bản học thuật chuyên sâu. Học hơn 2000 Kanji và 10000 từ.",
     badgeColor: "bg-rose-500/10 text-rose-500 border-rose-500/20",
     hoverGlow: "hover:border-rose-500/30 group-hover:shadow-rose-500/5 from-rose-500/[0.03]"
   }
@@ -59,6 +48,7 @@ export default function OnboardingPage() {
   const [selected, setSelected] = useState<"N5" | "N4" | "N3" | "N2" | "N1" | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useLanguage();
 
   const handleSelect = (level: "N5" | "N4" | "N3" | "N2" | "N1") => {
     setSelected(level);
@@ -86,7 +76,7 @@ export default function OnboardingPage() {
       }
     } catch (err: any) {
       console.error(err);
-      setError(err.message || "An error occurred");
+      setError(err.message || t("common.errorOccurred"));
       setSaving(false);
     }
   };
@@ -104,10 +94,10 @@ export default function OnboardingPage() {
             <GraduationCap className="h-6 w-6" />
           </div>
           <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-violet-600 via-fuchsia-500 to-rose-600 dark:from-violet-400 dark:via-fuchsia-400 dark:to-rose-400 bg-clip-text text-transparent sm:text-4xl">
-            Chào mừng bạn đến với JLPT Master!
+            {t("onboarding.title")}
           </h1>
           <p className="text-muted-foreground max-w-md mx-auto text-sm sm:text-base">
-            Hãy chọn mục tiêu cấp độ JLPT hiện tại của bạn để chúng tôi cá nhân hóa lộ trình học phù hợp nhất.
+            {t("onboarding.subtitle")}
           </p>
         </div>
 
@@ -145,12 +135,12 @@ export default function OnboardingPage() {
 
                     {/* Level Title */}
                     <h3 className="font-bold text-base text-foreground leading-tight">
-                      {opt.title}
+                      {t(`onboarding.levels.${opt.level}.title`)}
                     </h3>
 
                     {/* Level Description */}
                     <p className="text-xs text-muted-foreground/80 leading-relaxed line-clamp-4">
-                      {opt.description}
+                      {t(`onboarding.levels.${opt.level}.desc`)}
                     </p>
                   </div>
                 </CardContent>
@@ -175,11 +165,11 @@ export default function OnboardingPage() {
             {saving ? (
               <>
                 <Loader2 className="h-5 w-5 animate-spin" />
-                Đang tạo lộ trình...
+                {t("onboarding.loading")}
               </>
             ) : (
               <>
-                Xác nhận & Bắt đầu học
+                {t("onboarding.confirmBtn")}
               </>
             )}
           </Button>

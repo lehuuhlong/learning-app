@@ -13,15 +13,18 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { Bar, BarChart, XAxis, YAxis, CartesianGrid } from "recharts";
+import { useLanguage } from "@/components/providers/LanguageProvider";
 
 interface DatasetAnalyticsProps {
   data: Array<{ level: string; count: number }>;
 }
 
 export default function DatasetAnalytics({ data }: DatasetAnalyticsProps) {
+  const { t } = useLanguage();
+
   const chartConfig = {
     count: {
-      label: "Words Count",
+      label: t("datasetAnalytics.wordsCount"),
       color: "var(--chart-2)",
     },
   };
@@ -29,9 +32,9 @@ export default function DatasetAnalytics({ data }: DatasetAnalyticsProps) {
   return (
     <Card className="glass-card border-none flex-1 flex flex-col justify-between">
       <CardHeader>
-        <CardTitle className="text-lg font-semibold">N2 Dataset Analytics</CardTitle>
+        <CardTitle className="text-lg font-semibold">{t("datasetAnalytics.title")}</CardTitle>
         <CardDescription>
-          Distribution of vocabulary imported into the database across all JLPT levels
+          {t("datasetAnalytics.desc")}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -64,6 +67,7 @@ export default function DatasetAnalytics({ data }: DatasetAnalyticsProps) {
               />
               <Bar
                 dataKey="count"
+                name={t("datasetAnalytics.wordsCount")}
                 fill="var(--color-count)"
                 radius={[4, 4, 0, 0]}
                 maxBarSize={45}
@@ -72,7 +76,7 @@ export default function DatasetAnalytics({ data }: DatasetAnalyticsProps) {
           </ChartContainer>
         </div>
         <p className="text-center text-xs font-semibold text-violet-500/80 dark:text-violet-400/80 bg-violet-500/5 py-2 rounded-lg border border-violet-500/10">
-          📊 Tỷ lệ từ vựng và ngữ pháp đã được Import thành công vào Database.
+          {t("datasetAnalytics.alert")}
         </p>
       </CardContent>
     </Card>

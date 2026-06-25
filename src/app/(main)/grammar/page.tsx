@@ -20,10 +20,10 @@ import {
   ChevronDown,
   ChevronUp,
   Brain,
-  GraduationCap,
   Lightbulb,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/components/providers/LanguageProvider";
 
 interface Question {
   id: number;
@@ -36,7 +36,7 @@ interface Question {
 const quizQuestions: Question[] = [
   {
     id: 1,
-    question: "留学生のハチさん＿＿＿＿＿、日本での生活は毎日が新しい発見の連続だ。",
+    question: "留学生のハチさん＿＿＿＿＿、日本での生活は毎日が新しい発見の連続 da。",
     options: [
       "にとって (Đối với)",
       "にしたがって (Cập nhật / Theo như)",
@@ -64,7 +64,7 @@ const quizQuestions: Question[] = [
     options: [
       "にあたって (Nhân dịp / Trước khi)",
       "にかけて (Suốt / Đến)",
-      "に伴って (Cùng với)",
+      "に伴up (Cùng với)",
       "からこそ (Chính vì)"
     ],
     correctIndex: 0,
@@ -96,6 +96,7 @@ export default function GrammarQuizPage() {
   const [explaining, setExplaining] = useState<Record<number, boolean>>({});
   const [explanations, setExplanations] = useState<Record<number, AIExplanation>>({});
   const [expandedAI, setExpandedAI] = useState<Record<number, boolean>>({});
+  const { t } = useLanguage();
 
   function handleSelectOption(questionId: number, optionIndex: number) {
     if (showResults) return;
@@ -156,10 +157,10 @@ export default function GrammarQuizPage() {
       <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
         <div className="space-y-1">
           <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-violet-600 to-rose-600 dark:from-violet-400 dark:to-rose-400 bg-clip-text text-transparent">
-            Grammar AI Quiz
+            {t("grammar.title")}
           </h1>
           <p className="text-muted-foreground">
-            Test your JLPT N2 grammar and learn from errors using the integrated AI Tutor.
+            {t("grammar.subtitle")}
           </p>
         </div>
         {showResults && (
@@ -174,7 +175,11 @@ export default function GrammarQuizPage() {
             )}
             variant="outline"
           >
-            Quiz Result: {score} / {quizQuestions.length} Correct ({Math.round((score / quizQuestions.length) * 100)}%)
+            {t("grammar.resultBadge", {
+              score,
+              total: quizQuestions.length,
+              percent: Math.round((score / quizQuestions.length) * 100),
+            })}
           </Badge>
         )}
       </div>
@@ -206,7 +211,7 @@ export default function GrammarQuizPage() {
                   <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-xs text-primary font-bold">
                     {index + 1}
                   </span>
-                  N2 Grammar Question
+                  {t("grammar.questionTitle")}
                 </CardTitle>
                 <div className="text-base font-bold text-foreground leading-relaxed pt-1" style={{ fontFamily: "'Noto Sans JP', sans-serif" }}>
                   {q.question}
@@ -277,12 +282,12 @@ export default function GrammarQuizPage() {
                         {explaining[q.id] ? (
                           <>
                             <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                            Consulting AI Tutor...
+                            {t("grammar.consultingAi")}
                           </>
                         ) : (
                           <>
                             <Sparkles className="h-3.5 w-3.5" />
-                            Explain with AI (Giải thích bằng AI)
+                            {t("grammar.explainWithAi")}
                           </>
                         )}
                       </Button>
@@ -297,7 +302,7 @@ export default function GrammarQuizPage() {
                         >
                           <span className="flex items-center gap-2">
                             <Brain className="h-4 w-4 text-rose-500" />
-                            AI Explanation Details (Giải thích từ AI Tutor)
+                            {t("grammar.aiTitle")}
                           </span>
                           {isExpanded ? (
                             <ChevronUp className="h-4 w-4 text-violet-500" />
@@ -313,7 +318,7 @@ export default function GrammarQuizPage() {
                             <div className="space-y-1">
                               <span className="flex items-center gap-1.5 text-xs font-bold text-emerald-500 uppercase tracking-wide">
                                 <CheckCircle2 className="h-3.5 w-3.5" />
-                                Tại sao đáp án này đúng?
+                                {t("grammar.whyCorrect")}
                               </span>
                               <p className="pl-5 text-foreground/80">{explanation.whyCorrect}</p>
                             </div>
@@ -324,7 +329,7 @@ export default function GrammarQuizPage() {
                             <div className="space-y-1">
                               <span className="flex items-center gap-1.5 text-xs font-bold text-destructive uppercase tracking-wide">
                                 <XCircle className="h-3.5 w-3.5" />
-                                Tại sao đáp án của bạn chưa đúng?
+                                {t("grammar.whyWrong")}
                               </span>
                               <p className="pl-5 text-foreground/80">{explanation.whyWrong}</p>
                             </div>
@@ -335,7 +340,7 @@ export default function GrammarQuizPage() {
                             <div className="space-y-1">
                               <span className="flex items-center gap-1.5 text-xs font-bold text-violet-500 uppercase tracking-wide">
                                 <Lightbulb className="h-3.5 w-3.5 text-amber-500" />
-                                Chi tiết sắc thái & Cấu trúc ngữ pháp N2
+                                {t("grammar.nuance")}
                               </span>
                               <div className="pl-5 bg-violet-500/5 dark:bg-black/20 p-3 rounded-lg border border-violet-500/10">
                                 <p className="text-foreground/80 font-medium text-xs leading-5">
@@ -365,7 +370,7 @@ export default function GrammarQuizPage() {
             onClick={handleCheckAnswers}
           >
             <CheckCircle2 className="h-5 w-5" />
-            Check Answers & Score
+            {t("grammar.checkAnswers")}
           </Button>
         ) : (
           <Button
@@ -375,7 +380,7 @@ export default function GrammarQuizPage() {
             onClick={handleReset}
           >
             <RotateCcw className="h-5 w-5" />
-            Try Another Quiz
+            {t("grammar.tryAnother")}
           </Button>
         )}
       </div>

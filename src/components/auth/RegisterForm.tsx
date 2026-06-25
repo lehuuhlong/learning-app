@@ -15,6 +15,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Loader2, CheckCircle2 } from "lucide-react";
+import { useLanguage } from "@/components/providers/LanguageProvider";
 
 export default function RegisterForm() {
   const [name, setName] = useState("");
@@ -25,18 +26,19 @@ export default function RegisterForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const router = useRouter();
+  const { t } = useLanguage();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      setError(t("settings.passwordMismatch"));
       return;
     }
 
     if (password.length < 6) {
-      setError("Password must be at least 6 characters");
+      setError(t("settings.newPasswordMin"));
       return;
     }
 
@@ -52,7 +54,7 @@ export default function RegisterForm() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "Registration failed");
+        setError(data.error || t("settings.toastErrorPassword"));
         return;
       }
 
@@ -61,7 +63,7 @@ export default function RegisterForm() {
         router.push("/login");
       }, 1500);
     } catch {
-      setError("Something went wrong. Please try again.");
+      setError(t("auth.somethingWentWrong"));
     } finally {
       setIsLoading(false);
     }
@@ -90,10 +92,10 @@ export default function RegisterForm() {
           <span className="text-2xl">✨</span>
         </div>
         <CardTitle className="text-2xl font-bold tracking-tight">
-          Create your account
+          {t("auth.createAccount")}
         </CardTitle>
         <CardDescription className="text-muted-foreground">
-          Start mastering JLPT N2 today
+          {t("auth.signUpSubtitle")}
         </CardDescription>
       </CardHeader>
 
@@ -107,7 +109,7 @@ export default function RegisterForm() {
 
           <div className="space-y-2">
             <Label htmlFor="name" className="text-sm font-medium">
-              Full Name
+              {t("auth.nameLabel")}
             </Label>
             <Input
               id="name"
@@ -123,7 +125,7 @@ export default function RegisterForm() {
 
           <div className="space-y-2">
             <Label htmlFor="reg-email" className="text-sm font-medium">
-              Email
+              {t("auth.emailLabel")}
             </Label>
             <Input
               id="reg-email"
@@ -139,12 +141,12 @@ export default function RegisterForm() {
 
           <div className="space-y-2">
             <Label htmlFor="reg-password" className="text-sm font-medium">
-              Password
+              {t("auth.passwordLabel")}
             </Label>
             <Input
               id="reg-password"
               type="password"
-              placeholder="At least 6 characters"
+              placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -155,7 +157,7 @@ export default function RegisterForm() {
 
           <div className="space-y-2">
             <Label htmlFor="confirm-password" className="text-sm font-medium">
-              Confirm Password
+              {t("auth.confirmPasswordLabel")}
             </Label>
             <Input
               id="confirm-password"
@@ -171,17 +173,17 @@ export default function RegisterForm() {
 
           <Button
             type="submit"
-            className="w-full h-11 font-medium"
+            className="w-full h-11 font-medium bg-primary text-white"
             disabled={isLoading}
             id="register-submit-btn"
           >
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Creating account...
+                {t("auth.creatingAccount")}
               </>
             ) : (
-              "Create account"
+              t("auth.signUpBtn")
             )}
           </Button>
         </form>
@@ -189,13 +191,13 @@ export default function RegisterForm() {
 
       <CardFooter className="justify-center">
         <p className="text-sm text-muted-foreground">
-          Already have an account?{" "}
+          {t("auth.alreadyHaveAccount")}{" "}
           <Link
             href="/login"
             className="font-medium text-primary underline-offset-4 hover:underline"
             id="login-link"
           >
-            Sign in
+            {t("auth.signInBtn")}
           </Link>
         </p>
       </CardFooter>

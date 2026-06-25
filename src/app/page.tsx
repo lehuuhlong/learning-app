@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,13 +16,14 @@ import {
   BarChart3,
   Sparkles,
   ArrowRight,
-  Layers,
-  Brain,
   Target,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
+import { useLanguage } from "@/components/providers/LanguageProvider";
 
 export default function HomePage() {
+  const { t } = useLanguage();
+
   return (
     <div className="flex min-h-screen flex-col">
       {/* Navbar */}
@@ -38,12 +41,12 @@ export default function HomePage() {
             <ThemeToggle />
             <Link href="/login">
               <Button variant="ghost" size="sm" className="font-medium" id="hero-signin">
-                Sign in
+                {t("nav.signIn")}
               </Button>
             </Link>
             <Link href="/register">
               <Button size="sm" className="font-medium" id="hero-getstarted">
-                Get Started
+                {t("nav.getStarted")}
               </Button>
             </Link>
           </div>
@@ -68,31 +71,29 @@ export default function HomePage() {
                 className="gap-1.5 px-4 py-1.5 text-sm font-medium border-primary/30 bg-primary/5 text-primary shadow-sm shadow-primary/10"
               >
                 <Target className="h-3.5 w-3.5 text-rose-500" />
-                Focused on JLPT N2
+                {t("hero.badge")}
               </Badge>
             </div>
 
             {/* Heading */}
             <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
-              Master Japanese
+              {t("hero.title1")}
               <br />
               <span className="bg-gradient-to-r from-violet-600 via-fuchsia-500 to-rose-500 dark:from-violet-400 dark:via-fuchsia-400 dark:to-rose-400 bg-clip-text text-transparent">
-                with confidence
+                {t("hero.title2")}
               </span>
             </h1>
 
             {/* Subheading */}
             <p className="mx-auto max-w-xl text-lg text-muted-foreground leading-relaxed">
-              A modern, focused learning platform for JLPT N2. Interactive
-              flashcards, reading comprehension practice, and progress tracking
-              — all in one place.
+              {t("hero.subtitle")}
             </p>
 
             {/* CTA Buttons */}
             <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
               <Link href="/register">
                 <Button size="lg" className="gap-2 px-8 font-semibold text-base h-12 bg-gradient-to-r from-violet-600 to-rose-600 hover:from-violet-700 hover:to-rose-700 text-white shadow-md shadow-violet-500/20 border-none transition-all duration-300 hover:scale-105" id="cta-start">
-                  Start Learning Free
+                  {t("hero.ctaStart")}
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
@@ -103,7 +104,7 @@ export default function HomePage() {
                   className="px-8 font-medium text-base h-12 border-border/80 hover:border-violet-500/50 hover:bg-violet-500/5 transition-all"
                   id="cta-signin"
                 >
-                  I have an account
+                  {t("hero.ctaSignIn")}
                 </Button>
               </Link>
             </div>
@@ -123,10 +124,10 @@ export default function HomePage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center mb-16 space-y-4">
             <h2 className="text-3xl font-bold tracking-tight">
-              Everything you need for N2
+              {t("hero.sectionTitle")}
             </h2>
             <p className="text-muted-foreground text-lg">
-              Carefully designed tools to help you pass the JLPT N2 exam.
+              {t("hero.sectionSubtitle")}
             </p>
           </div>
 
@@ -138,20 +139,19 @@ export default function HomePage() {
                   <BookOpen className="h-6 w-6" />
                 </div>
                 <CardTitle className="text-lg mt-4">
-                  Vocabulary Flashcards
+                  {t("hero.featVocabTitle")}
                 </CardTitle>
                 <CardDescription>
-                  Interactive 3D flip cards with kanji, readings, meanings, and
-                  real example sentences.
+                  {t("hero.featVocabDesc")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex gap-2">
                   <Badge variant="secondary" className="bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 text-xs border border-blue-500/20">
-                    800+ words
+                    {t("hero.featVocabCount")}
                   </Badge>
                   <Badge variant="outline" className="text-xs">
-                    N2 level
+                    {t("common.n2Level")}
                   </Badge>
                 </div>
               </CardContent>
@@ -164,20 +164,19 @@ export default function HomePage() {
                   <FileText className="h-6 w-6" />
                 </div>
                 <CardTitle className="text-lg mt-4">
-                  Reading Comprehension
+                  {t("hero.featDokkaiTitle")}
                 </CardTitle>
                 <CardDescription>
-                  Split-screen Dokkai practice with vocabulary notes and instant
-                  answer feedback.
+                  {t("hero.featDokkaiDesc")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex gap-2">
                   <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 text-xs border border-emerald-500/20">
-                    Split-screen
+                    {t("hero.featDokkaiBadge1")}
                   </Badge>
                   <Badge variant="outline" className="text-xs">
-                    Resizable
+                    {t("hero.featDokkaiBadge2")}
                   </Badge>
                 </div>
               </CardContent>
@@ -190,20 +189,19 @@ export default function HomePage() {
                   <BarChart3 className="h-6 w-6" />
                 </div>
                 <CardTitle className="text-lg mt-4">
-                  Progress Dashboard
+                  {t("hero.featProgressTitle")}
                 </CardTitle>
                 <CardDescription>
-                  Track your learning journey with beautiful charts, streaks, and
-                  mastery metrics.
+                  {t("hero.featProgressDesc")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex gap-2">
                   <Badge variant="secondary" className="bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 text-xs border border-amber-500/20">
-                    Charts
+                    {t("hero.featProgressBadge1")}
                   </Badge>
                   <Badge variant="outline" className="text-xs">
-                    Streaks
+                    {t("hero.featProgressBadge2")}
                   </Badge>
                 </div>
               </CardContent>
@@ -217,7 +215,7 @@ export default function HomePage() {
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
           <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
             <Sparkles className="h-3.5 w-3.5" />
-            <span>JLPT Master — Built for N2 learners</span>
+            <span>{t("hero.footer")}</span>
           </div>
         </div>
       </footer>

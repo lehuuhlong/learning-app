@@ -13,8 +13,9 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { Bar, BarChart, XAxis, YAxis, CartesianGrid } from "recharts";
+import { useLanguage } from "@/components/providers/LanguageProvider";
 
-const chartData = [
+const rawChartData = [
   { day: "Mon", words: 8, quizzes: 2 },
   { day: "Tue", words: 12, quizzes: 3 },
   { day: "Wed", words: 5, quizzes: 1 },
@@ -24,24 +25,37 @@ const chartData = [
   { day: "Sun", words: 7, quizzes: 1 },
 ];
 
-const chartConfig = {
-  words: {
-    label: "Words Learned",
-    color: "var(--chart-1)",
-  },
-  quizzes: {
-    label: "Quizzes Taken",
-    color: "var(--chart-3)",
-  },
+const dayTranslations: Record<string, Record<string, string>> = {
+  en: { Mon: "Mon", Tue: "Tue", Wed: "Wed", Thu: "Thu", Fri: "Fri", Sat: "Sat", Sun: "Sun" },
+  vi: { Mon: "T2", Tue: "T3", Wed: "T4", Thu: "T5", Fri: "T6", Sat: "T7", Sun: "CN" }
 };
 
 export default function ProgressChart() {
+  const { t, language } = useLanguage();
+
+  const chartConfig = {
+    words: {
+      label: t("progressChart.words"),
+      color: "var(--chart-1)",
+    },
+    quizzes: {
+      label: t("progressChart.quizzes"),
+      color: "var(--chart-3)",
+    },
+  };
+
+  const days = dayTranslations[language] || dayTranslations["en"];
+  const chartData = rawChartData.map(item => ({
+    ...item,
+    day: days[item.day] || item.day
+  }));
+
   return (
-    <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
+    <Card className="border-border/50 bg-card/80 backdrop-blur-sm w-full">
       <CardHeader>
-        <CardTitle className="text-lg font-semibold">Weekly Progress</CardTitle>
+        <CardTitle className="text-lg font-semibold">{t("progressChart.title")}</CardTitle>
         <CardDescription>
-          Your learning activity over the past 7 days
+          {t("progressChart.desc")}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -74,12 +88,14 @@ export default function ProgressChart() {
               />
               <Bar
                 dataKey="words"
+                name={t("progressChart.words")}
                 fill="var(--color-words)"
                 radius={[4, 4, 0, 0]}
                 maxBarSize={40}
               />
               <Bar
                 dataKey="quizzes"
+                name={t("progressChart.quizzes")}
                 fill="var(--color-quizzes)"
                 radius={[4, 4, 0, 0]}
                 maxBarSize={40}
